@@ -1,0 +1,9 @@
+'-
+  cecioのテスト
+  初期値の値をループ用の値として使用する
+  ループ用の値の現在値のコピーとその後処理は(結果用 終値 初期値)の場合には
+  "roft ach krz roft (処理) roft roft"となる．
+  ループ用の値は自動で削除される
+-'
+
+0 10 1 cecio roft ach krz roft ata roft roft oicec

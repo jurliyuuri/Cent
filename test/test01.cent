@@ -1,0 +1,5 @@
+'-
+  サブルーチン呼び出し
+  実際にはインライン展開している
+-'
+1 4 ata <double krz ata> double double
