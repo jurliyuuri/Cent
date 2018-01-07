@@ -25,6 +25,7 @@ namespace Cent
                 ["laf"] = 0,
                 ["ol"] = 0,
                 ["if"] = 0,
+                ["leles"] = 0,
             };
         }
 
@@ -70,7 +71,7 @@ namespace Cent
             }
             else if (compareMap.ContainsKey(item))
             {
-                throw new ApplicationException($"Sorry, not support this keyword");
+                writer.WriteLine(FromCompareOperator(item, compareMap[item]));
             }
             else if (this.functionNames.Contains(item))
             {
@@ -109,6 +110,27 @@ namespace Cent
                 default:
                     throw new ApplicationException($"Invalid operation: {operation}");
             }
+        }
+
+        private string FromCompareOperator(string operation, int operandCount)
+        {
+            if (this.useVarStack < operandCount)
+            {
+                throw new ApplicationException("Stack is empty");
+            }
+
+            int count = this.labelCount["leles"];
+            this.labelCount["leles"] = ++count;
+            this.useVarStack--;
+
+            StringBuilder buffer = new StringBuilder("fi f5@ f5+4@ ").Append(operation);
+            
+            buffer.Append(" malkrz leles-niv").Append(count).AppendLine(" xx");
+            buffer.Append("krz 0 f5+4@ krz leles-situv").Append(count).AppendLine(" xx");
+            buffer.Append("nll leles-niv").Append(count).AppendLine(" krz 1 f5+4@");
+            buffer.Append("nll leles-situv").Append(count).Append(" ata 4 f5");
+            
+            return buffer.ToString();
         }
 
         private string FromCentOperator(string operation, int operandCount)
