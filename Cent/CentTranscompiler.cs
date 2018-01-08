@@ -53,8 +53,6 @@ namespace Cent
         protected List<string> operations;
         protected List<List<string>> functions;
         
-        protected uint useVarStack;
-
         public IReadOnlyList<string> InFileNames { get; }
 
         public CentTranscompiler(IList<string> inFileNames)
@@ -62,8 +60,6 @@ namespace Cent
             this.operations = new List<string>();
             this.functions = new List<List<string>>();
             
-            this.useVarStack = 0;
-
             this.InFileNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(inFileNames.ToList());
         }
 
