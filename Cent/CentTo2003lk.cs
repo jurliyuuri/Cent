@@ -201,6 +201,8 @@ namespace Cent
                     return $"nll cecio{this.labelCount["cecio"]} fi f5@ f5+4@ llo malkrz oicec{this.labelCount["cecio"]} xx";
                 case "oicec":
                     return $"ata 1 f5@ krz {this.jumpLabelStack.Pop()} xx nll {this.jumpLabelStack.Pop()} ata 8 f5";
+                case "kinfit":
+                    return $"krz f1 f0 nta f5 f0 dtosna 2 f0 nta 4 f5 krz f0 f5@";
                 default:
                     throw new ApplicationException($"Invalid operation: {operation}");
             }

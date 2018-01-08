@@ -34,7 +34,8 @@ namespace Cent
                     ["roft"] = 1, ["ycax"] = 1, ["pielyn"] = 0,
                     ["fal"] = 1, ["laf"] = 0,
                     ["fi"] = 1, ["ol"] = 0, ["if"] = 0,
-                    ["cecio"] = 2, ["oicec"] = 0, 
+                    ["cecio"] = 2, ["oicec"] = 0,
+                    ["kinfit"] = 0,
                     //["krzq"] = 2, ["kRzq"] = 2, ["achq"] = 2,
                     //["roftq"] = 1,
                 });
