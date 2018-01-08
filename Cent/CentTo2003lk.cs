@@ -172,9 +172,9 @@ namespace Cent
                         throw new ApplicationException("'if' cannot be here");
                     }
 
-                    if(label == "ol")
+                    if(label.StartsWith("ol"))
                     {
-                        label = this.jumpLabelStack.Pop();
+                        this.jumpLabelStack.Pop();
                     }
 
                     return $"nll {label}";
