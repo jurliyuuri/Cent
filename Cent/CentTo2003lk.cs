@@ -9,14 +9,16 @@ namespace Cent
 {
     class CentTo2003lk : CentTranscompiler
     {
-        List<string> functionNames;
+        List<string> subroutineNames;
         Stack<string> jumpLabelStack;
+        Stack<string> callSubroutines;
         Dictionary<string, int> labelCount;
 
         public CentTo2003lk(List<string> inFileNames) : base(inFileNames)
         {
-            functionNames = new List<string>();
+            subroutineNames = new List<string>();
             jumpLabelStack = new Stack<string>();
+            callSubroutines = new Stack<string>();
             labelCount = new Dictionary<string, int>()
             {
                 ["cecio"] = 0,
@@ -32,11 +34,11 @@ namespace Cent
 
         protected override void Write(string outFileName)
         {
-            using (var writer = new StreamWriter(outFileName, false, new UTF8Encoding(false)))
+            using (var writer = new StringWriter())
             {
-                foreach (var func in this.functions)
+                foreach (var func in this.subroutines)
                 {
-                    this.functionNames.Add(func[0]);
+                    this.subroutineNames.Add(func[0]);
                 }
 
                 writer.WriteLine("nta 4 f5 krz f1 f5@ krz f5 f1");
@@ -48,10 +50,15 @@ namespace Cent
 
                 writer.WriteLine("krz f1 f5");
                 writer.WriteLine("krz f5@ f1 ata 4 f5 krz f5@ xx");
+
+                using (var file = new StreamWriter(outFileName, false, new UTF8Encoding(false)))
+                {
+                    file.Write(writer.ToString());
+                }
             }
         }
 
-        private void WriteOperation(StreamWriter writer, string item)
+        private void WriteOperation(StringWriter writer, string item)
         {
             if (item.All(x => char.IsDigit(x)))
             {
@@ -69,12 +76,19 @@ namespace Cent
             {
                 writer.WriteLine(FromCompareOperator(item, compareMap[item]));
             }
-            else if (this.functionNames.Contains(item))
+            else if (this.subroutineNames.Contains(item))
             {
-                foreach (var funcItem in this.functions.Where(x => x[0] == item).Single().Skip(1))
+                if(this.callSubroutines.Contains(item))
+                {
+                    throw new ApplicationException("Not support recursive subroutine");
+                }
+
+                this.callSubroutines.Push(item);
+                foreach (var funcItem in this.subroutines.Where(x => x[0] == item).Single().Skip(1))
                 {
                     WriteOperation(writer, funcItem);
                 }
+                this.callSubroutines.Pop();
             }
             else
             {

@@ -51,14 +51,14 @@ namespace Cent
         }
 
         protected List<string> operations;
-        protected List<List<string>> functions;
+        protected List<List<string>> subroutines;
         
         public IReadOnlyList<string> InFileNames { get; }
 
         public CentTranscompiler(IList<string> inFileNames)
         {
             this.operations = new List<string>();
-            this.functions = new List<List<string>>();
+            this.subroutines = new List<List<string>>();
             
             this.InFileNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(inFileNames.ToList());
         }
@@ -76,143 +76,14 @@ namespace Cent
             {
                 Read(inFile);
             }
-            
-            int falCount;
-            int lafCount;
-            int fiCount;
-            int olCount;
-            int ifCount;
-            int cecioCount;
-            int oicecCount;
 
-            foreach (var func in this.functions)
-            {
-                falCount = 0;
-                lafCount = 0;
-                fiCount = 0;
-                olCount = 0;
-                ifCount = 0;
-                cecioCount = 0;
-                oicecCount = 0;
-                
-                var funcName = func[0];
-                if (funcName.All(x => char.IsDigit(x)) || funcName.Any(x => x == '<' || x == '>')
-                    || operatorMap.ContainsKey(funcName) || centOperatorMap.ContainsKey(funcName)
-                    || compareMap.ContainsKey(funcName))
-                {
-                    throw new ApplicationException($"Invalid cesrva name: {func[0]}");
-                }
-
-                foreach (var item in func.Skip(1))
-                {
-                    switch(item)
-                    {
-                        case "fal":
-                            falCount++;
-                            break;
-                        case "laf":
-                            lafCount++;
-                            break;
-                        case "fi":
-                            fiCount++;
-                            break;
-                        case "ol":
-                            olCount++;
-                            break;
-                        case "if":
-                            ifCount++;
-                            break;
-                        case "cecio":
-                            cecioCount++;
-                            break;
-                        case "oicec":
-                            oicecCount++;
-                            break;
-                    }
-                }
-
-                if(falCount != lafCount)
-                {
-                    throw new ApplicationException("count of 'laf' don't equals count of 'fal'.");
-                }
-
-                if (fiCount != ifCount)
-                {
-                    throw new ApplicationException("count of 'if' don't equals count of 'fi'.");
-                }
-
-                if (fiCount != olCount)
-                {
-                    throw new ApplicationException("count of 'ol' don't equals count of 'fi'.");
-                }
-
-                if(cecioCount != oicecCount)
-                {
-                    throw new ApplicationException("count of 'oicec' don't equals count of 'cecio'.");
-                }
-            }
-
-            falCount = 0;
-            lafCount = 0;
-            fiCount = 0;
-            olCount = 0;
-            ifCount = 0;
-            cecioCount = 0;
-            oicecCount = 0;
-
-            foreach (var item in this.operations)
-            {
-                switch (item)
-                {
-                    case "fal":
-                        falCount++;
-                        break;
-                    case "laf":
-                        lafCount++;
-                        break;
-                    case "fi":
-                        fiCount++;
-                        break;
-                    case "ol":
-                        olCount++;
-                        break;
-                    case "if":
-                        ifCount++;
-                        break;
-                    case "cecio":
-                        cecioCount++;
-                        break;
-                    case "oicec":
-                        oicecCount++;
-                        break;
-                }
-            }
-
-            if (falCount != lafCount)
-            {
-                throw new ApplicationException("count of 'laf' don't equals to count of 'fal'.");
-            }
-
-            if (fiCount != ifCount)
-            {
-                throw new ApplicationException("count of 'if' don't equals to count of 'fi'.");
-            }
-
-            if (fiCount < olCount)
-            {
-                throw new ApplicationException("count of 'ol' don't less than or equals to count of 'fi'.");
-            }
-
-            if (cecioCount != oicecCount)
-            {
-                throw new ApplicationException("count of 'oicec' don't equals to count of 'cecio'.");
-            }
+            CheckCentProgramme();
 
             Console.WriteLine("main: {0}", this.operations.Aggregate(new StringBuilder("["),
                 (x, y) => x.Append(y).Append(", "),
                 x => x.Append("]").ToString()));
 
-            Console.WriteLine("functions: {0}", this.functions.Aggregate(new StringBuilder("["),
+            Console.WriteLine("subroutines: {0}", this.subroutines.Aggregate(new StringBuilder("["),
                 (x, y) => x.Append(
                     y.Aggregate(new StringBuilder("["),
                         (z, w) => z.Append(w).Append(", "),
@@ -295,7 +166,7 @@ namespace Cent
                     {
                         if(isFunc)
                         {
-                            throw new ApplicationException("Cannot defined cersva in cersva");
+                            throw new ApplicationException("Cannot defined subroutine in subroutine");
                         }
                         AppendLast();
                         isFunc = true;
@@ -307,7 +178,7 @@ namespace Cent
                             throw new ApplicationException("Invalind word: '>'");
                         }
                         AppendLast();
-                        this.functions.Add(funcList);
+                        this.subroutines.Add(funcList);
                         funcList = new List<string>();
                         isFunc = false;
                     }
@@ -321,6 +192,140 @@ namespace Cent
             if(isFunc)
             {
                 throw new ApplicationException("Not found '>'");
+            }
+        }
+
+        private void CheckCentProgramme()
+        {
+            int falCount;
+            int lafCount;
+            int fiCount;
+            int olCount;
+            int ifCount;
+            int cecioCount;
+            int oicecCount;
+
+            foreach (var subroutine in this.subroutines)
+            {
+                falCount = 0;
+                lafCount = 0;
+                fiCount = 0;
+                olCount = 0;
+                ifCount = 0;
+                cecioCount = 0;
+                oicecCount = 0;
+
+                var subroutineName = subroutine[0];
+                if (char.IsDigit(subroutineName[0]) || subroutineName.Any(x => x == '<' || x == '>')
+                    || operatorMap.ContainsKey(subroutineName) || centOperatorMap.ContainsKey(subroutineName)
+                    || compareMap.ContainsKey(subroutineName))
+                {
+                    throw new ApplicationException($"Invalid subroutine name: {subroutine[0]}");
+                }
+
+                foreach (var item in subroutine.Skip(1))
+                {
+                    switch (item)
+                    {
+                        case "fal":
+                            falCount++;
+                            break;
+                        case "laf":
+                            lafCount++;
+                            break;
+                        case "fi":
+                            fiCount++;
+                            break;
+                        case "ol":
+                            olCount++;
+                            break;
+                        case "if":
+                            ifCount++;
+                            break;
+                        case "cecio":
+                            cecioCount++;
+                            break;
+                        case "oicec":
+                            oicecCount++;
+                            break;
+                    }
+                }
+
+                if (falCount != lafCount)
+                {
+                    throw new ApplicationException("count of 'laf' don't equals count of 'fal'.");
+                }
+
+                if (fiCount != ifCount)
+                {
+                    throw new ApplicationException("count of 'if' don't equals count of 'fi'.");
+                }
+
+                if (fiCount < olCount)
+                {
+                    throw new ApplicationException("count of 'ol' don't less than or equals to count of 'fi'.");
+                }
+
+                if (cecioCount != oicecCount)
+                {
+                    throw new ApplicationException("count of 'oicec' don't equals count of 'cecio'.");
+                }
+            }
+
+            falCount = 0;
+            lafCount = 0;
+            fiCount = 0;
+            olCount = 0;
+            ifCount = 0;
+            cecioCount = 0;
+            oicecCount = 0;
+
+            foreach (var item in this.operations)
+            {
+                switch (item)
+                {
+                    case "fal":
+                        falCount++;
+                        break;
+                    case "laf":
+                        lafCount++;
+                        break;
+                    case "fi":
+                        fiCount++;
+                        break;
+                    case "ol":
+                        olCount++;
+                        break;
+                    case "if":
+                        ifCount++;
+                        break;
+                    case "cecio":
+                        cecioCount++;
+                        break;
+                    case "oicec":
+                        oicecCount++;
+                        break;
+                }
+            }
+
+            if (falCount != lafCount)
+            {
+                throw new ApplicationException("count of 'laf' don't equals to count of 'fal'.");
+            }
+
+            if (fiCount != ifCount)
+            {
+                throw new ApplicationException("count of 'if' don't equals to count of 'fi'.");
+            }
+
+            if (fiCount < olCount)
+            {
+                throw new ApplicationException("count of 'ol' don't less than or equals to count of 'fi'.");
+            }
+
+            if (cecioCount != oicecCount)
+            {
+                throw new ApplicationException("count of 'oicec' don't equals to count of 'cecio'.");
             }
         }
 
