@@ -147,7 +147,7 @@ namespace Cent
                 case "ycax":
                     return "ata 4 f5";
                 case "pielyn":
-                    return $"ata f1 f5";
+                    return $"krz f1 f5";
                 case "fal":
                     this.labelCount["fal"] += 1;
 
