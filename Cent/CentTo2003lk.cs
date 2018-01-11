@@ -188,7 +188,7 @@ namespace Cent
 
                     if(label.StartsWith("ol"))
                     {
-                        label = this.jumpLabelStack.Pop();
+                        this.jumpLabelStack.Pop();
                     }
 
                     return $"nll {label}";
