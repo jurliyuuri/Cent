@@ -10,6 +10,7 @@ namespace Cent
     class CentTo2003lk : CentTranscompiler
     {
         List<string> subroutineNames;
+        Dictionary<string, int> funcNames;
         Stack<string> jumpLabelStack;
         Stack<string> callSubroutines;
         Dictionary<string, int> labelCount;
@@ -17,6 +18,7 @@ namespace Cent
         public CentTo2003lk(List<string> inFileNames) : base(inFileNames)
         {
             subroutineNames = new List<string>();
+            funcNames = new Dictionary<string, int>();
             jumpLabelStack = new Stack<string>();
             callSubroutines = new Stack<string>();
             labelCount = new Dictionary<string, int>()
@@ -36,9 +38,17 @@ namespace Cent
         {
             using (var writer = new StringWriter())
             {
-                foreach (var func in this.subroutines)
+                foreach (var subrt in this.subroutines)
                 {
-                    this.subroutineNames.Add(func[0]);
+                    if(subrt[0] == "xok")
+                    {
+                        writer.WriteLine("xok {0}", subrt[1]);
+                        this.funcNames.Add(subrt[1], int.Parse(subrt[2]));
+                    }
+                    else
+                    {
+                        this.subroutineNames.Add(subrt[0]);
+                    }
                 }
 
                 writer.WriteLine("nta 4 f5 krz f1 f5@ krz f5 f1");
@@ -89,6 +99,18 @@ namespace Cent
                     WriteOperation(writer, funcItem);
                 }
                 this.callSubroutines.Pop();
+            }
+            else if (this.funcNames.ContainsKey(item))
+            {
+                var argc = this.funcNames[item];
+                if(argc == 0)
+                {
+                    writer.WriteLine("nta 4 f5 inj {0} xx f5@ krz f0 f5@", item);
+                }
+                else
+                {
+                    writer.WriteLine("nta 4 f5 inj {0} xx f5@ ata {1} f5 krz f0 f5@", item, argc * 4);
+                }
             }
             else
             {

@@ -198,90 +198,56 @@ namespace Cent
 
         private void CheckCentProgramme()
         {
-            int falCount;
-            int lafCount;
-            int fiCount;
-            int olCount;
-            int ifCount;
-            int cecioCount;
-            int oicecCount;
-
             foreach (var subroutine in this.subroutines)
             {
-                falCount = 0;
-                lafCount = 0;
-                fiCount = 0;
-                olCount = 0;
-                ifCount = 0;
-                cecioCount = 0;
-                oicecCount = 0;
+                string subroutineName = subroutine[0];
 
-                var subroutineName = subroutine[0];
-                if (char.IsDigit(subroutineName[0]) || subroutineName.Any(x => x == '<' || x == '>')
-                    || operatorMap.ContainsKey(subroutineName) || centOperatorMap.ContainsKey(subroutineName)
-                    || compareMap.ContainsKey(subroutineName))
+                if (subroutineName == "xok")
                 {
-                    throw new ApplicationException($"Invalid subroutine name: {subroutine[0]}");
-                }
-
-                foreach (var item in subroutine.Skip(1))
-                {
-                    switch (item)
+                    subroutineName = subroutine[1];
+                    if (subroutine.Count != 3)
                     {
-                        case "fal":
-                            falCount++;
-                            break;
-                        case "laf":
-                            lafCount++;
-                            break;
-                        case "fi":
-                            fiCount++;
-                            break;
-                        case "ol":
-                            olCount++;
-                            break;
-                        case "if":
-                            ifCount++;
-                            break;
-                        case "cecio":
-                            cecioCount++;
-                            break;
-                        case "oicec":
-                            oicecCount++;
-                            break;
+                        throw new ApplicationException("Invalid arguments of 'xok'");
+                    }
+
+                    CheckSburoutineName(subroutineName);
+
+                    if(subroutine[2].Any(x => !char.IsDigit(x)))
+                    {
+                        throw new ApplicationException($"Invalid argument's count: {subroutine[2]}");
                     }
                 }
-
-                if (falCount != lafCount)
+                else
                 {
-                    throw new ApplicationException("count of 'laf' don't equals count of 'fal'.");
-                }
-
-                if (fiCount != ifCount)
-                {
-                    throw new ApplicationException("count of 'if' don't equals count of 'fi'.");
-                }
-
-                if (fiCount < olCount)
-                {
-                    throw new ApplicationException("count of 'ol' don't less than or equals to count of 'fi'.");
-                }
-
-                if (cecioCount != oicecCount)
-                {
-                    throw new ApplicationException("count of 'oicec' don't equals count of 'cecio'.");
+                    CheckSburoutineName(subroutineName);
+                    CheckCode(subroutine.Skip(1));
                 }
             }
 
-            falCount = 0;
-            lafCount = 0;
-            fiCount = 0;
-            olCount = 0;
-            ifCount = 0;
-            cecioCount = 0;
-            oicecCount = 0;
+            CheckCode(this.operations);
+        }
 
-            foreach (var item in this.operations)
+        private void CheckSburoutineName(string subroutineName)
+        {
+            if (char.IsDigit(subroutineName[0]) || subroutineName.Any(x => x == '<' || x == '>')
+                || operatorMap.ContainsKey(subroutineName) || centOperatorMap.ContainsKey(subroutineName)
+                || compareMap.ContainsKey(subroutineName))
+            {
+                throw new ApplicationException($"Invalid subroutine name: {subroutineName}");
+            }
+        }
+
+        private void CheckCode(IEnumerable<string> code)
+        {
+            int falCount = 0;
+            int lafCount = 0;
+            int fiCount = 0;
+            int olCount = 0;
+            int ifCount = 0;
+            int cecioCount = 0;
+            int oicecCount = 0;
+
+            foreach (var item in code)
             {
                 switch (item)
                 {
