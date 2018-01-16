@@ -1,0 +1,9 @@
+'-
+ 外部関数の呼び出し
+ 書式は<xok 関数名 関数の引数>となる
+-'
+<xok jyvied 2>
+<xok tostesn 2>
+
+30 10 jyvied
+30 10 tostesn 0
