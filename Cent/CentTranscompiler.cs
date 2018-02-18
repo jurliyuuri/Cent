@@ -36,8 +36,8 @@ namespace Cent
                     ["fi"] = 1, ["ol"] = 0, ["if"] = 0,
                     ["cecio"] = 2, ["oicec"] = 0,
                     ["kinfit"] = 0,
-                    //["krzq"] = 2, ["kRzq"] = 2, ["achq"] = 2,
-                    //["roftq"] = 1,
+                    ["krzq"] = 2, ["kRzq"] = 2, ["achq"] = 2,
+                    ["roftq"] = 1,
                 });
 
             compareMap = new System.Collections.ObjectModel.ReadOnlyDictionary<string, int>(
