@@ -38,6 +38,7 @@ namespace Cent
                     ["kinfit"] = 0,
                     ["krzq"] = 2, ["kRzq"] = 2, ["achq"] = 2,
                     ["roftq"] = 1,
+                    ["malef"] = 0, ["felam"] = 0
                 });
 
             compareMap = new System.Collections.ObjectModel.ReadOnlyDictionary<string, int>(
@@ -261,6 +262,8 @@ namespace Cent
             int ifCount = 0;
             int cecioCount = 0;
             int oicecCount = 0;
+            int malefCount = 0;
+            int felamCount = 0;
 
             foreach (var item in code)
             {
@@ -287,6 +290,12 @@ namespace Cent
                     case "oicec":
                         oicecCount++;
                         break;
+                    case "malef":
+                        malefCount++;
+                        break;
+                    case "felam":
+                        felamCount++;
+                        break;
                 }
             }
 
@@ -308,6 +317,11 @@ namespace Cent
             if (cecioCount != oicecCount)
             {
                 throw new ApplicationException("count of 'oicec' don't equals to count of 'cecio'.");
+            }
+
+            if (malefCount != felamCount)
+            {
+                throw new ApplicationException("count of 'felam' don't equals to count of 'malef'.");
             }
         }
 

@@ -51,11 +51,34 @@ namespace Cent
                     }
                 }
 
+                writer.WriteLine("'i'c");
                 writer.WriteLine("nta 4 f5 krz f1 f5@ krz f5 f1");
 
+                bool isMalef = false;
                 foreach (var item in this.operations)
                 {
-                    WriteOperation(writer, item);
+                    if(item == "malef")
+                    {
+                        isMalef = true;
+                    }
+                    else if(isMalef)
+                    {
+                        switch(item)
+                        {
+                            case "felam":
+                                isMalef = false;
+                                writer.WriteLine();
+                                writer.WriteLine("'i'c");
+                                break;
+                            default:
+                                writer.Write("{0} ", item);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        WriteOperation(writer, item);
+                    }
                 }
 
                 writer.WriteLine("krz f1 f5");
