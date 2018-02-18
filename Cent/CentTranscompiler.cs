@@ -99,6 +99,11 @@ namespace Cent
         {
             bool isFunc = false;
             List<string> funcList = new List<string>();
+
+            if (!File.Exists(inFile))
+            {
+                throw new ApplicationException($"Not found '{inFile}'");
+            }
             
             using(var reader = new StreamReader(inFile, new UTF8Encoding(false)))
             {
@@ -200,17 +205,27 @@ namespace Cent
         {
             foreach (var subroutine in this.subroutines)
             {
+                if(!subroutine.Any())
+                {
+                    throw new ApplicationException("Subroutine name expected");
+                }
+
                 string subroutineName = subroutine[0];
 
                 if (subroutineName == "xok")
                 {
+                    if (!subroutine.Any(x => x != "xok"))
+                    {
+                        throw new ApplicationException("Function name expected");
+                    }
+
                     subroutineName = subroutine[1];
                     if (subroutine.Count != 3)
                     {
                         throw new ApplicationException("Invalid arguments of 'xok'");
                     }
 
-                    CheckSburoutineName(subroutineName);
+                    CheckSubroutineName(subroutineName);
 
                     if(subroutine[2].Any(x => !char.IsDigit(x)))
                     {
@@ -219,7 +234,7 @@ namespace Cent
                 }
                 else
                 {
-                    CheckSburoutineName(subroutineName);
+                    CheckSubroutineName(subroutineName);
                     CheckCode(subroutine.Skip(1));
                 }
             }
@@ -227,7 +242,7 @@ namespace Cent
             CheckCode(this.operations);
         }
 
-        private void CheckSburoutineName(string subroutineName)
+        private void CheckSubroutineName(string subroutineName)
         {
             if (char.IsDigit(subroutineName[0]) || subroutineName.Any(x => x == '<' || x == '>')
                 || operatorMap.ContainsKey(subroutineName) || centOperatorMap.ContainsKey(subroutineName)
