@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cent.Core;
 
 namespace Cent
 {
@@ -16,30 +17,45 @@ namespace Cent
                 if (args.Length > 0)
                 {
                     var outFileOptionIndex = Array.IndexOf(args, "-o");
+                    CentTranscompiler cent;
 
                     if (outFileOptionIndex == -1)
                     {
-                        var transpiler = new CentTo2003lk(args);
-                        transpiler.Run("a.lk");
+                        if (Array.IndexOf(args, "-f") != -1)
+                        {
+
+                        }
+                        else
+                        {
+                            cent = new CentTo2003lk(args);
+                            cent.Run("a.lk");
+                        }
                     }
                     else if (outFileOptionIndex == args.Length - 1)
                     {
                         Console.WriteLine("No set output file name");
-                        Console.WriteLine("cent.exe [inFileNames] (-o [outFileName])");
+                        Console.WriteLine("cent.exe (-l|-f) [inFileNames] (-o [outFileName])");
                         Environment.Exit(1);
                     }
                     else
                     {
                         var outFileIndex = outFileOptionIndex + 1;
                         var inFiles = args.Where((x, i) => i != outFileOptionIndex && i != outFileIndex).ToList();
-                        var transpiler = new CentTo2003lk(inFiles);
 
-                        transpiler.Run(args[outFileIndex]);
+                        if (Array.IndexOf(args, "-f") != -1)
+                        {
+
+                        }
+                        else
+                        {
+                            cent = new CentTo2003lk(inFiles);
+                            cent.Run(args[outFileIndex]);
+                        }
                     }
                 }
                 else
                 {
-                    Console.WriteLine("cent.exe [inFileNames] (-o [outFileName])");
+                    Console.WriteLine("cent.exe (-l|-f) [inFileNames] (-o [outFileName])");
                 }
             }
             catch(Exception ex)

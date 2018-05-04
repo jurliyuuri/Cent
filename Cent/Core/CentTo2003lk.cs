@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace Cent
+namespace Cent.Core
 {
     class CentTo2003lk : CentTranscompiler
     {

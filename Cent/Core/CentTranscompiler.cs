@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cent
+namespace Cent.Core
 {
-    abstract class CentTranscompiler
+    public abstract class CentTranscompiler
     {
         protected static readonly IReadOnlyDictionary<string, int> operatorMap;
 
