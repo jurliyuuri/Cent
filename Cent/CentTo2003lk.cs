@@ -71,6 +71,10 @@ namespace Cent
                                 writer.WriteLine("'i'c");
                                 break;
                             default:
+                                if(item.StartsWith(";"))
+                                {
+                                    throw new ApplicationException("Unsupport 2003lk's comment ';'");
+                                }
                                 writer.Write("{0} ", item);
                                 break;
                         }
