@@ -7,7 +7,7 @@
     <ProjectGuid>{AB7C3351-875C-4861-8229-4C418552C1E2}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Cent</RootNamespace>
-    <AssemblyName>Cent</AssemblyName>
+    <AssemblyName>cent</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LkCommon">
+      <HintPath>..\libraries\LkCommon.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\CentTo2003lk.cs" />
+    <Compile Include="Core\CentCompiler.cs" />
     <Compile Include="Core\CentTranscompiler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

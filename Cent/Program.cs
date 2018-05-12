@@ -23,7 +23,8 @@ namespace Cent
                     {
                         if (Array.IndexOf(args, "-f") != -1)
                         {
-
+                            cent = new CentCompiler(args.Where(x => x != "-f").ToList());
+                            cent.Run("a.out");
                         }
                         else
                         {
@@ -44,13 +45,14 @@ namespace Cent
 
                         if (Array.IndexOf(args, "-f") != -1)
                         {
-
+                            cent = new CentCompiler(args.Where(x => x != "-f").ToList());
                         }
                         else
                         {
                             cent = new CentTo2003lk(inFiles);
-                            cent.Run(args[outFileIndex]);
                         }
+
+                        cent.Run(args[outFileIndex]);
                     }
                 }
                 else
