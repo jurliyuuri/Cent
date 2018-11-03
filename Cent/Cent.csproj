@@ -43,8 +43,14 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="UbplCommon">
+      <HintPath>..\libraries\UbplCommon.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CentToUbplBinary.cs" />
+    <Compile Include="Core\CentTo2003fBinary.cs" />
+    <Compile Include="Core\CentToWat.cs" />
     <Compile Include="Core\CentTo2003lk.cs" />
     <Compile Include="Core\CentCompiler.cs" />
     <Compile Include="Core\CentTranscompiler.cs" />

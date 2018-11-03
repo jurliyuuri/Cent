@@ -9,11 +9,11 @@ namespace Cent.Core
 {
     class CentTo2003lk : CentTranscompiler
     {
-        List<string> subroutineNames;
-        Dictionary<string, int> funcNames;
-        Stack<string> jumpLabelStack;
-        Stack<string> callSubroutines;
-        Dictionary<string, int> labelCount;
+        readonly List<string> subroutineNames;
+        readonly Dictionary<string, int> funcNames;
+        readonly Stack<string> jumpLabelStack;
+        readonly Stack<string> callSubroutines;
+        readonly Dictionary<string, int> labelCount;
 
         public CentTo2003lk(List<string> inFileNames) : base(inFileNames)
         {
