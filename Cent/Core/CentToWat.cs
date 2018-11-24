@@ -58,8 +58,7 @@ namespace Cent.Core
                         this.subroutineNames.Add(subrt[0]);
                     }
                 }
-
-                //writer.WriteLine("  (import \"cent\" \"memory\" (memory 1))");
+                
                 writer.WriteLine("  (memory $memory (export \"memory\") 1)");
                 writer.WriteLine("  (func (export \"main\") (result i32) (local $count i32) (local $tmpi32 i32) (local $tmpi64 i64)");
                 writer.WriteLine("    i32.const -4 set_local $count");
@@ -201,6 +200,62 @@ namespace Cent.Core
 
         private string FromCompareOperator(string operation, int operandCount)
         {
+            switch(operation)
+            {
+                case "xtlo":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.ge_s i32.store ;; xtlo";
+                case "xylo":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.gt_s i32.store ;; xylo";
+                case "clo":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.eq i32.store ;; clo";
+                case "niv":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.ne i32.store ;; niv";
+                case "llo":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.lt_s i32.store ;; llo";
+                case "xolo":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.le_s i32.store ;; xolo";
+                case "xtlonys":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.ge_u i32.store ;; xtlonys";
+                case "xylonys":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.gt_u i32.store ;; xylonys";
+                case "llonys":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.lt_u i32.store ;; llonys";
+                case "xolonys":
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                        "    i32.le_u i32.store ;; xolonys";
+                default:
+                    throw new ApplicationException($"Invalid operation: {operation}");
+            }
+
             throw new ApplicationException($"Invalid operation: {operation}");
         }
 
@@ -226,9 +281,13 @@ namespace Cent.Core
                     return "    i32.const -4 set_local $count ;; pielyn";
                 case "fal":
                 case "laf":
+                    throw new ApplicationException($"Invalid operation: {operation}");
                 case "fi":
+                    return "    get_local $count i32.load if ;; fi";
                 case "ol":
+                    return "    else ;; ol";
                 case "if":
+                    return "    end ;; if";
                 case "cecio":
                 case "oicec":
                     throw new ApplicationException($"Invalid operation: {operation}");

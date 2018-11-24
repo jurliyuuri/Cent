@@ -46,7 +46,7 @@ namespace Cent
                         var outFileIndex = outFileOptionIndex + 1;
                         var inFiles = args.Where((x, i) => i != outFileOptionIndex && i != outFileIndex).ToList();
 
-                        cent = GetTranscompiler(args.ToList());
+                        cent = GetTranscompiler(inFiles.ToList());
                         cent.Run(args[outFileIndex]);
                     }
                 }
