@@ -255,8 +255,6 @@ namespace Cent.Core
                 default:
                     throw new ApplicationException($"Invalid operation: {operation}");
             }
-
-            throw new ApplicationException($"Invalid operation: {operation}");
         }
 
         private string FromCentOperator(string operation, int operandCount)
@@ -280,8 +278,32 @@ namespace Cent.Core
                 case "pielyn":
                     return "    i32.const -4 set_local $count ;; pielyn";
                 case "fal":
+                    {
+                        int count = this.labelCount["fal"]++;
+                        string fal = "$fal" + count;
+                        string falSituv = "$falSituv" + count;
+                        this.jumpLabelStack.Push(fal);
+
+                        return "    block " + falSituv + "\n"+
+                            "    loop " + fal + "\n" +
+                            "    get_local $count i32.load i32.eqz\n" +
+                            "    br_if "+ falSituv + ";; fal";
+                    }
                 case "laf":
-                    throw new ApplicationException($"Invalid operation: {operation}");
+                    {
+                        string fal = this.jumpLabelStack.Pop();
+
+                        if (!fal.StartsWith("$fal"))
+                        {
+                            throw new ApplicationException("'laf' cannot be here");
+                        }
+                        else
+                        {
+                            return "    br " + fal + "\n" +
+                                "    end\n" +
+                                "    end ;; laf";
+                        }
+                    }
                 case "fi":
                     return "    get_local $count i32.load if ;; fi";
                 case "ol":
