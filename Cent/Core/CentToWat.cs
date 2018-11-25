@@ -151,7 +151,7 @@ namespace Cent.Core
             {
                 case "nac":
                     return "    get_local $count get_local $count i32.load\n" +
-                        "    i32.const 0xffffffff i32.xor i32.const 1 i32.add i32.store";
+                        "    i32.const 0xffffffff i32.xor i32.const 1 i32.add i32.store ;; nac";
                 case "ata":
                     return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
                         "    get_local $count i32.load\n" +
@@ -284,7 +284,13 @@ namespace Cent.Core
                         "    get_local $count i32.const 4 i32.sub i32.load\n" +
                         "    i32.store i32.store ;; ach";
                 case "roft":
-                    throw new ApplicationException($"Invalid operation: {operation}");
+                    return "    get_local $count i32.const 8 i32.sub\n" +
+                        "    get_local $count i32.const 4 i32.sub i32.load\n" +
+                        "    get_local $count i32.const 4 i32.sub\n" +      
+                        "    get_local $count i32.load\n" +
+                        "    get_local $count\n" +
+                        "    get_local $count i32.const 8 i32.sub i32.load\n" +
+                        "    i32.store i32.store i32.store ;; roft";
                 case "ycax":
                     return "    get_local $count i32.const 4 i32.sub set_local $count ;; ycax";
                 case "pielyn":
@@ -331,8 +337,8 @@ namespace Cent.Core
 
                         return "    block " + oicec + "\n" +
                             "    loop " + cecio + "\n" +
-                            "    get_local $count i32.load get_local $count i32.const 4 i32.sub i32.load i32.lt_s\n" +
-                            "    br_if " + oicec + ";; cecio";
+                            "    get_local $count i32.const 4 i32.sub i32.load get_local $count i32.load i32.lt_s\n" +
+                            "    br_if " + oicec + " ;; cecio";
                     }
                 case "oicec":
                     {
