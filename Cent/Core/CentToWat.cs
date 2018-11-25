@@ -50,7 +50,7 @@ namespace Cent.Core
                         {
                             writer.Write(" i32");
                         }
-                        writer.WriteLine(")))");
+                        writer.WriteLine(") (result i32)))");
                         this.funcNames.Add(subrt[1], argc);
                     }
                     else
@@ -117,21 +117,18 @@ namespace Cent.Core
             {
                 int argc = this.funcNames[item];
 
-                if (argc == 0)
+                if (argc != 0)
                 {
-                    writer.WriteLine("    get_local $count get_local $count");
-                }
-                else
-                {
-                    writer.WriteLine("    get_local $count i32.const {0} i32.sub tee_local $count get_local $count", argc * 4);
+                    writer.WriteLine("    get_local $count i32.const {0} i32.sub set_local $count", argc * 4);
                 }
 
                 for (var i = 1; i <= argc; i++)
                 {
-                    writer.WriteLine("    get_local $count i32.const {0} i32.add i32.load ;;  {1}", i * 4, i);
+                    writer.WriteLine("    get_local $count i32.const {0} i32.add i32.load ;;  [{1}]", i * 4, i);
                 }
                 writer.WriteLine("    call ${0} ;; fenxe {0}", item);
-                writer.WriteLine("    i32.store i32.const 4 i32.add set_local $count ;; zalizales");
+                writer.WriteLine("    set_local $tmp32");
+                writer.WriteLine("    get_local $count i32.const 4 i32.add tee_local $count get_local $tmp32 i32.store ;; zalizales");
             }
             else
             {
