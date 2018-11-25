@@ -111,7 +111,19 @@ namespace Cent.Core
             }
             else if (this.subroutineNames.Contains(item))
             {
-                throw new ApplicationException($"Unknown word: '{item}'");
+                if (this.callSubroutines.Contains(item))
+                {
+                    throw new ApplicationException("Not support recursive subroutine");
+                }
+
+                this.callSubroutines.Push(item);
+                writer.WriteLine(";; start {0}", item);
+                foreach (var funcItem in this.subroutines.Where(x => x[0] == item).Single().Skip(1))
+                {
+                    WriteOperation(writer, funcItem);
+                }
+                writer.WriteLine(";; end {0}", item);
+                this.callSubroutines.Pop();
             }
             else if (this.funcNames.ContainsKey(item))
             {
