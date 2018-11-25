@@ -81,8 +81,7 @@ namespace Cent.Core
                 }
                 
                 writer.WriteLine("    get_local $count i32.const 4 i32.div_s i32.const 1 i32.add");
-                writer.WriteLine("  )\n)");
-
+                writer.WriteLine("  )" + Environment.NewLine + ")");
 
                 using (var file = new StreamWriter(outFileName, false, new UTF8Encoding(false)))
                 {
@@ -150,59 +149,59 @@ namespace Cent.Core
             switch (operation)
             {
                 case "nac":
-                    return "    get_local $count get_local $count i32.load\n" +
+                    return "    get_local $count get_local $count i32.load" + Environment.NewLine +
                         "    i32.const 0xffffffff i32.xor i32.const 1 i32.add i32.store ;; nac";
                 case "ata":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.add i32.store ;; ata";
                 case "nta":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.sub i32.store ;; nta";
                 case "ada":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.and i32.store ;; ada";
                 case "ekc":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.or i32.store ;; ekc";
                 case "dto":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.shr_u i32.store ;; dto";
                 case "dro":
                 case "dRo":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.shl i32.store ;; dro";
                 case "dtosna":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.shr_s i32.store ;; dtosna";
                 case "dal":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.xor i32.const 0xffffffff i32.xor i32.store ;; dal";
                 case "lat":
-                    return "    get_local $count i32.const 4 i32.sub i32.load i64.extend_u/i32\n" +
-                        "    get_local $count i32.load i64.extend_u/i32\n" +
-                        "    i64.mul set_local $tmp64\n" +
+                    return "    get_local $count i32.const 4 i32.sub i32.load i64.extend_u/i32" + Environment.NewLine +
+                        "    get_local $count i32.load i64.extend_u/i32" + Environment.NewLine +
+                        "    i64.mul set_local $tmp64" + Environment.NewLine +
                         "    get_local $count i32.const 4 i32.sub get_local $tmp64 i32.wrap/i64 i32.store" +
                         "    get_local $count get_local $tmp64 i64.const 32 i64.shr_u i32.wrap/i64 i32.store ;; lat";
                 case "latsna":
-                    return "    get_local $count i32.const 4 i32.sub i32.load i64.extend_s/i32\n" +
-                        "    get_local $count i32.load i64.extend_s/i32\n" +
-                        "    i64.mul set_local $tmp64\n" +
+                    return "    get_local $count i32.const 4 i32.sub i32.load i64.extend_s/i32" + Environment.NewLine +
+                        "    get_local $count i32.load i64.extend_s/i32" + Environment.NewLine +
+                        "    i64.mul set_local $tmp64" + Environment.NewLine +
                         "    get_local $count i32.const 4 i32.sub get_local $tmp64 i32.wrap/i64 i32.store" +
                         "    get_local $count get_local $tmp64 i64.const 32 i64.shr_s i32.wrap/i64 i32.store ;; latsna";
                 default:
@@ -215,54 +214,54 @@ namespace Cent.Core
             switch(operation)
             {
                 case "xtlo":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.ge_s i32.store ;; xtlo";
                 case "xylo":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.gt_s i32.store ;; xylo";
                 case "clo":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.eq i32.store ;; clo";
                 case "niv":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.ne i32.store ;; niv";
                 case "llo":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.lt_s i32.store ;; llo";
                 case "xolo":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.le_s i32.store ;; xolo";
                 case "xtlonys":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.ge_u i32.store ;; xtlonys";
                 case "xylonys":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.gt_u i32.store ;; xylonys";
                 case "llonys":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.lt_u i32.store ;; llonys";
                 case "xolonys":
-                    return "    get_local $count i32.const 4 i32.sub tee_local $count\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count i32.const 4 i32.add i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.add i32.load" + Environment.NewLine +
                         "    i32.le_u i32.store ;; xolonys";
                 default:
                     throw new ApplicationException($"Invalid operation: {operation}");
@@ -275,21 +274,21 @@ namespace Cent.Core
             {
                 case "krz":
                 case "kRz":
-                    return "    get_local $count i32.const 4 i32.add tee_local $count\n" +
+                    return "    get_local $count i32.const 4 i32.add tee_local $count" + Environment.NewLine +
                         "    get_local $count i32.const 4 i32.sub i32.load i32.store ;; krz";
                 case "ach":
-                    return "    get_local $count i32.const 4 i32.sub\n" +
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count\n" +
-                        "    get_local $count i32.const 4 i32.sub i32.load\n" +
+                    return "    get_local $count i32.const 4 i32.sub" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.sub i32.load" + Environment.NewLine +
                         "    i32.store i32.store ;; ach";
                 case "roft":
-                    return "    get_local $count i32.const 8 i32.sub\n" +
-                        "    get_local $count i32.const 4 i32.sub i32.load\n" +
-                        "    get_local $count i32.const 4 i32.sub\n" +      
-                        "    get_local $count i32.load\n" +
-                        "    get_local $count\n" +
-                        "    get_local $count i32.const 8 i32.sub i32.load\n" +
+                    return "    get_local $count i32.const 8 i32.sub" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.sub i32.load" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.sub" + Environment.NewLine +
+                        "    get_local $count i32.load" + Environment.NewLine +
+                        "    get_local $count" + Environment.NewLine +
+                        "    get_local $count i32.const 8 i32.sub i32.load" + Environment.NewLine +
                         "    i32.store i32.store i32.store ;; roft";
                 case "ycax":
                     return "    get_local $count i32.const 4 i32.sub set_local $count ;; ycax";
@@ -303,8 +302,8 @@ namespace Cent.Core
                         this.jumpLabelStack.Push(fal);
 
                         return "    block " + laf + "\n"+
-                            "    loop " + fal + "\n" +
-                            "    get_local $count i32.load i32.eqz\n" +
+                            "    loop " + fal + "" + Environment.NewLine +
+                            "    get_local $count i32.load i32.eqz" + Environment.NewLine +
                             "    br_if "+ laf + ";; fal";
                     }
                 case "laf":
@@ -313,8 +312,8 @@ namespace Cent.Core
 
                         if (fal.StartsWith("$fal"))
                         {
-                            return "    br " + fal + "\n" +
-                                "    end\n" +
+                            return "    br " + fal + "" + Environment.NewLine +
+                                "    end" + Environment.NewLine +
                                 "    end ;; laf";
                         }
                         else
@@ -335,18 +334,22 @@ namespace Cent.Core
                         string oicec = "$oicec" + count;
                         this.jumpLabelStack.Push(cecio);
 
-                        return "    block " + oicec + "\n" +
-                            "    loop " + cecio + "\n" +
-                            "    get_local $count i32.const 4 i32.sub i32.load get_local $count i32.load i32.lt_s\n" +
-                            "    br_if " + oicec + " ;; cecio";
+                        return "    block " + oicec + Environment.NewLine +
+                            "    loop " + cecio + Environment.NewLine +
+                            "    get_local $count i32.const 4 i32.sub i32.load get_local $count i32.load i32.lt_s" + Environment.NewLine +
+                            "    if" + Environment.NewLine +
+                            "        get_local $count i32.const 8 i32.sub set_local $count" + Environment.NewLine +
+                            "        br " + oicec + Environment.NewLine + 
+                            "    end ;; cecio";
                     }
                 case "oicec":
                     {
                         string cecio = this.jumpLabelStack.Pop();
                         if (cecio.StartsWith("$cecio"))
                         {
-                            return "    br "+ cecio + "\n" +
-                                "    end\n" +
+                            return "    get_local $count get_local $count i32.load i32.const 1 i32.add i32.store" + Environment.NewLine +
+                                "    br "+ cecio + Environment.NewLine +
+                                "    end" + Environment.NewLine +
                                 "    end ;; oicec";
                         }
                         else
@@ -355,7 +358,7 @@ namespace Cent.Core
                         }
                     }
                 case "kinfit":
-                    return "    get_local $count i32.const 4 i32.add tee_local $count\n" +
+                    return "    get_local $count i32.const 4 i32.add tee_local $count" + Environment.NewLine +
                         "    get_local $count i32.const 4 i32.div_s i32.store ;; kinfit";
                 default:
                     throw new ApplicationException($"Invalid operation: {operation}");
