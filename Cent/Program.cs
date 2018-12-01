@@ -22,13 +22,18 @@ namespace Cent
                     if (outFileOptionIndex == -1)
                     {
                         cent = GetTranscompiler(args.ToList());
-                        if (Array.IndexOf(args, "-f") != -1)
+                        if (Array.IndexOf(args, "-f") != -1 || Array.IndexOf(args, "--2003f") != -1
+                            || Array.IndexOf(args, "--ubpl") != -1)
                         {
                             cent.Run("a.out");
                         }
                         else if (Array.IndexOf(args, "--wat") != -1)
                         {
                             cent.Run("a.wat");
+                        }
+                        else if (Array.IndexOf(args, "--lua64") != -1)
+                        {
+                            cent.Run("a.lua");
                         }
                         else
                         {
@@ -38,7 +43,7 @@ namespace Cent
                     else if (outFileOptionIndex == args.Length - 1)
                     {
                         Console.WriteLine("No set output file name");
-                        Console.WriteLine("cent.exe (-l|-f|--wat) [inFileNames] (-o [outFileName])");
+                        Console.WriteLine("cent.exe (-l|-f|--2003f|--ubpl|--wat|--lua64) [inFileNames] (-o [outFileName])");
                         Environment.Exit(1);
                     }
                     else
@@ -52,7 +57,7 @@ namespace Cent
                 }
                 else
                 {
-                    Console.WriteLine("cent.exe (-l|-f|--wat) [inFileNames] (-o [outFileName])");
+                    Console.WriteLine("cent.exe (-l|-f|--2003f|--ubpl|--wat|--lua64) [inFileNames] (-o [outFileName])");
                 }
             }
             catch(Exception ex)
@@ -77,6 +82,10 @@ namespace Cent
             else if (inFileNames.Any(x => x == "--wat"))
             {
                 return new CentToWat(inFileNames.Where(x => x != "--wat").ToList());
+            }
+            else if (inFileNames.Any(x => x  == "--lua64"))
+            {
+                return new CentToLua64(inFileNames.Where(x => x != "--lua64").ToList());
             }
             else
             {

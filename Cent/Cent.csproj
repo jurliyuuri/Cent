@@ -48,6 +48,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CentToLua64.cs" />
     <Compile Include="Core\CentToUbplBinary.cs" />
     <Compile Include="Core\CentTo2003fBinary.cs" />
     <Compile Include="Core\CentToWat.cs" />
