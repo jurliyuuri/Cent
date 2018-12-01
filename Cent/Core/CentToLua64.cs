@@ -181,9 +181,15 @@ namespace Cent.Core
                         indent + "stack[#stack] = to32(to64s(t2) >> t1)";
                 case "dal":
                     return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32((2 & t1) | ~(t2 | t1))";
+                        indent + "stack[#stack] = to32((t2 & t1) | (~t2 & ~t1))";
                 case "lat":
+                    return indent + "t1, t2 = stack[#stack], stack[#stack - 1]" + Environment.NewLine +
+                        indent + "t1 = t1 * t2" + Environment.NewLine +
+                        indent + "stack[#stack], stack[#stack - 1] = to32(t1), to32(t1 >> 32)";
                 case "latsna":
+                    return indent + "t1, t2 = stack[#stack], stack[#stack - 1]" + Environment.NewLine +
+                        indent + "t1 = to64s(t1) * to64s(t2)" + Environment.NewLine +
+                        indent + "stack[#stack], stack[#stack - 1] = to32(t1), to32(t1 >> 32)";
                 default:
                     throw new ApplicationException($"Invalid operation: {operation}");
             }
