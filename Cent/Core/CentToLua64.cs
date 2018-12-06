@@ -278,6 +278,8 @@ namespace Cent.Core
         {
             switch (operation)
             {
+                case ".":
+                    return indent + "print(table.remove(stack))";
                 case "krz":
                 case "kRz":
                     return indent + "table.insert(stack, stack[#stack])";

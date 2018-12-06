@@ -30,6 +30,7 @@ namespace Cent.Core
             centOperatorMap = new System.Collections.ObjectModel.ReadOnlyDictionary<string, int>(
                 new Dictionary<string, int>
                 {
+                    ["."] = 1,
                     ["krz"] = 1, ["kRz"] = 1, ["ach"] = 2,
                     ["roft"] = 1, ["ycax"] = 1, ["pielyn"] = 0,
                     ["fal"] = 1, ["laf"] = 0,

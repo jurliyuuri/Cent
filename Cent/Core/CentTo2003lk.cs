@@ -186,6 +186,8 @@ namespace Cent.Core
             string label;
             switch(operation)
             {
+                case ".":
+                    return "inj 3126834864 xx f5@ ata 4 f5";
                 case "krz":
                 case "kRz":
                     return "nta 4 f5 krz f5+4@ f5@";

@@ -261,6 +261,10 @@ namespace Cent.Core
             string label;
             switch (operation)
             {
+                case ".":
+                    Fnx(UbplCommon.UbplConstant.TVARLON_KNLOAN_ADDRESS, Seti(F5));
+                    Ata(4, F5);
+                    break;
                 case "krz":
                 case "kRz":
                     Nta(4, F5);

@@ -261,6 +261,10 @@ namespace Cent.Core
             string label;
             switch (operation)
             {
+                case ".":
+                    Inj(LkCommon.LkConstant.TVARLON_KNLOAN_ADDRESS, XX, Seti(F5));
+                    Ata(4, F5);
+                    break;
                 case "krz":
                 case "kRz":
                     Nta(4, F5);

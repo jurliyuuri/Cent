@@ -58,7 +58,7 @@ namespace Cent.Core
                         this.subroutineNames.Add(subrt[0]);
                     }
                 }
-                
+                writer.WriteLine("  (import \"native\" \"out\" (func $out (param i32)))");
                 writer.WriteLine("  (memory $memory (export \"memory\") 1)");
                 writer.WriteLine("  (func (export \"main\") (result i32) (local $count i32) (local $tmp32 i32) (local $tmp64 i64)");
                 writer.WriteLine("    i32.const -4 set_local $count");
@@ -281,6 +281,10 @@ namespace Cent.Core
         {
             switch (operation)
             {
+                case ".":
+                    return "    get_local $count i32.load" + Environment.NewLine +
+                        "    call $out" + Environment.NewLine +
+                        "    get_local $count i32.const 4 i32.sub set_local $count";
                 case "krz":
                 case "kRz":
                     return "    get_local $count i32.const 4 i32.add tee_local $count" + Environment.NewLine +
