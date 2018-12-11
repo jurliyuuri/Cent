@@ -59,21 +59,9 @@ namespace Cent.Core
                 writer.WriteLine("local stack = {}");
                 writer.WriteLine("local t1, t2 = nil, nil");
                 
-                bool isMalef = false;
                 foreach (var item in this.operations)
                 {
-                    if (item == "malef")
-                    {
-                        isMalef = true;
-                        throw new ApplicationException($"Sorry, not support this keyword: {item}");
-                    }
-                    else if (isMalef)
-                    {
-                    }
-                    else
-                    {
-                        WriteOperation(writer, item);
-                    }
+                    WriteOperation(writer, item);
                 }
 
                 writer.WriteLine("print(\"[\" .. table.concat(stack, \",\") .. \"]\")");
@@ -156,6 +144,8 @@ namespace Cent.Core
             switch (operation)
             {
                 case "nac":
+                    return indent + "stack[#stack] = to32(~stack[#stack])";
+                case "sna":
                     return indent + "stack[#stack] = to32(-stack[#stack])";
                 case "ata":
                     return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +

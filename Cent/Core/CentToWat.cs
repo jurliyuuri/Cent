@@ -63,21 +63,9 @@ namespace Cent.Core
                 writer.WriteLine("  (func (export \"main\") (result i32) (local $count i32) (local $tmp32 i32) (local $tmp64 i64)");
                 writer.WriteLine("    i32.const -4 set_local $count");
 
-                bool isMalef = false;
                 foreach (var item in this.operations)
                 {
-                    if (item == "malef")
-                    {
-                        isMalef = true;
-                        throw new ApplicationException($"Sorry, not support this keyword: {item}");
-                    }
-                    else if (isMalef)
-                    {
-                    }
-                    else
-                    {
-                        WriteOperation(writer, item);
-                    }
+                    WriteOperation(writer, item);
                 }
                 
                 writer.WriteLine("    get_local $count i32.const 4 i32.div_s i32.const 1 i32.add");
@@ -159,7 +147,10 @@ namespace Cent.Core
             {
                 case "nac":
                     return "    get_local $count get_local $count i32.load" + Environment.NewLine +
-                        "    i32.const 0xffffffff i32.xor i32.const 1 i32.add i32.store ;; nac";
+                        "    i32.const -1 i32.xor i32.store ;; nac";
+                case "sna":
+                    return "    get_local $count get_local $count i32.load" + Environment.NewLine +
+                        "    i32.const -1 i32.xor i32.const 1 i32.add i32.store ;; sna";
                 case "ata":
                     return "    get_local $count i32.const 4 i32.sub tee_local $count" + Environment.NewLine +
                         "    get_local $count i32.load" + Environment.NewLine +

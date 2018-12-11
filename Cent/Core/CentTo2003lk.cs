@@ -53,36 +53,10 @@ namespace Cent.Core
 
                 writer.WriteLine("'i'c");
                 writer.WriteLine("nta 4 f5 krz f1 f5@ krz f5 f1");
-
-                bool isMalef = false;
+                
                 foreach (var item in this.operations)
                 {
-                    if(item == "malef")
-                    {
-                        isMalef = true;
-                    }
-                    else if(isMalef)
-                    {
-                        switch(item)
-                        {
-                            case "felam":
-                                isMalef = false;
-                                writer.WriteLine();
-                                writer.WriteLine("'i'c");
-                                break;
-                            default:
-                                if(item.StartsWith(";"))
-                                {
-                                    throw new ApplicationException("Unsupport 2003lk's comment ';'");
-                                }
-                                writer.Write("{0} ", item);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        WriteOperation(writer, item);
-                    }
+                    WriteOperation(writer, item);
                 }
 
                 writer.WriteLine("krz f1 f5");
@@ -151,18 +125,24 @@ namespace Cent.Core
             {
                 throw new ApplicationException($"Sorry, not support this keyword");
             }
-
-            switch(operandCount)
+            else if (operation == "sna")
             {
-                case 1:
-                    return $"{operation} f5@";
-                case 2:
-                    return $"{operation} f5@ f5+4@ ata 4 f5";
-                case 3:
-                    // lat及びlatsnaのみ
-                    return $"{operation} f5@ f5+4@ f0 inj f0 f5+4@ f5@";
-                default:
-                    throw new ApplicationException($"Invalid operation: {operation}");
+                return "dal 0 f5@ ata 1 f5@";
+            }
+            else
+            {
+                switch (operandCount)
+                {
+                    case 1:
+                        return $"{operation} f5@";
+                    case 2:
+                        return $"{operation} f5@ f5+4@ ata 4 f5";
+                    case 3:
+                        // lat及びlatsnaのみ
+                        return $"{operation} f5@ f5+4@ f0 inj f0 f5+4@ f5@";
+                    default:
+                        throw new ApplicationException($"Invalid operation: {operation}");
+                }
             }
         }
 

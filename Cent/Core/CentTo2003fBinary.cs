@@ -58,22 +58,9 @@ namespace Cent.Core
             Krz(F1, Seti(F5));
             Krz(F5, F1);
 
-            bool isMalef = false;
             foreach (var item in this.Operations)
             {
-
-                if (item == "malef")
-                {
-                    isMalef = true;
-                    throw new ApplicationException($"Sorry, not support this keyword: {item}");
-                }
-                else if (isMalef)
-                {
-                }
-                else
-                {
-                    WriteOperation(item);
-                }
+                WriteOperation(item);
             }
 
             Krz(F1, F5);
@@ -150,6 +137,10 @@ namespace Cent.Core
             {
                 case "nac":
                     Dal(0, Seti(F5));
+                    break;
+                case "sna":
+                    Dal(0, Seti(F5));
+                    Ata(1, Seti(F5));
                     break;
                 case "ata":
                     Ata(Seti(F5), Seti(F5 + 4));

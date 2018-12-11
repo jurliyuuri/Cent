@@ -20,7 +20,8 @@ namespace Cent.Core
             operatorMap = new System.Collections.ObjectModel.ReadOnlyDictionary<string, int>(
                 new Dictionary<string, int>
                 {
-                    ["nac"] = 1,["ata"] = 2, ["nta"] = 2,
+                    ["nac"] = 1, ["sna"] = 1,
+                    ["ata"] = 2, ["nta"] = 2,
                     ["kak"] = 2, ["ada"] = 2, ["ekc"] = 2,
                     ["dal"] = 2, ["dto"] = 2, ["dtosna"] = 2,
                     ["dro"] = 2, ["dRo"] = 2,
@@ -39,7 +40,6 @@ namespace Cent.Core
                     ["kinfit"] = 0,
                     ["krzq"] = 2, ["kRzq"] = 2, ["achq"] = 2,
                     ["roftq"] = 1,
-                    ["malef"] = 0, ["felam"] = 0
                 });
 
             compareMap = new System.Collections.ObjectModel.ReadOnlyDictionary<string, int>(
@@ -263,8 +263,6 @@ namespace Cent.Core
             int ifCount = 0;
             int cecioCount = 0;
             int oicecCount = 0;
-            int malefCount = 0;
-            int felamCount = 0;
 
             foreach (var item in code)
             {
@@ -291,12 +289,6 @@ namespace Cent.Core
                     case "oicec":
                         oicecCount++;
                         break;
-                    case "malef":
-                        malefCount++;
-                        break;
-                    case "felam":
-                        felamCount++;
-                        break;
                 }
             }
 
@@ -318,11 +310,6 @@ namespace Cent.Core
             if (cecioCount != oicecCount)
             {
                 throw new ApplicationException("count of 'oicec' don't equals to count of 'cecio'.");
-            }
-
-            if (malefCount != felamCount)
-            {
-                throw new ApplicationException("count of 'felam' don't equals to count of 'malef'.");
             }
         }
 
