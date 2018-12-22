@@ -53,22 +53,30 @@ namespace Cent.Core
                 });
         }
 
-        protected List<string> operations;
-        protected List<List<string>> subroutines;
-        
         public IReadOnlyList<string> InFileNames { get; }
+
+        protected List<string> tokens;
+        private readonly List<List<string>> subroutines;
+
+        protected readonly List<string> subroutineNames;
+        protected readonly Dictionary<string, uint> funcNames;
+        protected readonly Stack<string> callSubroutines;
 
         public CentTranscompiler(IList<string> inFileNames)
         {
-            this.operations = new List<string>();
-            this.subroutines = new List<List<string>>();
-            
             this.InFileNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(inFileNames.ToList());
+            
+            this.tokens = new List<string>();
+            this.subroutines = new List<List<string>>();
+
+            this.subroutineNames = new List<string>();
+            this.funcNames = new Dictionary<string, uint>();
+            this.callSubroutines = new Stack<string>();
         }
 
         public CentTranscompiler(string[] inFiles) : this(inFiles.ToList()) { }
 
-        public void Run(string outFileName)
+        public void Output(string outFileName)
         {
             if(!this.InFileNames.All(x => x.EndsWith(".cent")))
             {
@@ -77,30 +85,22 @@ namespace Cent.Core
 
             foreach (var inFile in this.InFileNames)
             {
-                Read(inFile);
+                Lexer(inFile);
             }
 
             CheckCentProgramme();
-
-            Console.WriteLine("main: {0}", this.operations.Aggregate(new StringBuilder("["),
-                (x, y) => x.Append(y).Append(", "),
-                x => x.Append("]").ToString()));
-
-            Console.WriteLine("subroutines: {0}", this.subroutines.Aggregate(new StringBuilder("["),
-                (x, y) => x.Append(
-                    y.Aggregate(new StringBuilder("["),
-                        (z, w) => z.Append(w).Append(", "),
-                        z => z.Append("]").ToString())
-                    ).Append(", "),
-                x => x.Append("]").ToString()));
-
+            ListingTokens();
             Write(outFileName);
         }
 
-        private void Read(string inFile)
+        /// <summary>
+        /// 字句解析部分
+        /// </summary>
+        /// <param name="inFile">読み込むファイル名</param>
+        private void Lexer(string inFile)
         {
             bool isFunc = false;
-            List<string> funcList = new List<string>();
+            List<string> funcTokens = new List<string>();
 
             if (!File.Exists(inFile))
             {
@@ -111,17 +111,18 @@ namespace Cent.Core
             {
                 StringBuilder buffer = new StringBuilder();
 
+                // 追加先を判断して最後に追加するローカル関数
                 void AppendLast()
                 {
                     if (buffer.Length > 0)
                     {
                         if (isFunc)
                         {
-                            funcList.Add(buffer.ToString());
+                            funcTokens.Add(buffer.ToString());
                         }
                         else
                         {
-                            this.operations.Add(buffer.ToString());
+                            this.tokens.Add(buffer.ToString());
                         }
                     }
 
@@ -186,8 +187,8 @@ namespace Cent.Core
                             throw new ApplicationException("Invalind word: '>'");
                         }
                         AppendLast();
-                        this.subroutines.Add(funcList);
-                        funcList = new List<string>();
+                        this.subroutines.Add(funcTokens);
+                        funcTokens = new List<string>();
                         isFunc = false;
                     }
                     else 
@@ -203,10 +204,14 @@ namespace Cent.Core
             }
         }
 
+        /// <summary>
+        /// コードが正しいかチェック
+        /// </summary>
         private void CheckCentProgramme()
         {
             foreach (var subroutine in this.subroutines)
             {
+                // サブルーチン定義が空
                 if(!subroutine.Any())
                 {
                     throw new ApplicationException("Subroutine name expected");
@@ -214,21 +219,27 @@ namespace Cent.Core
 
                 string subroutineName = subroutine[0];
 
+                // サブルーチン定義が外部関数のインポート定義の場合
                 if (subroutineName == "xok")
                 {
+                    // xok以外が無い
                     if (!subroutine.Any(x => x != "xok"))
                     {
                         throw new ApplicationException("Function name expected");
                     }
 
                     subroutineName = subroutine[1];
+
+                    // インポート定義の引数がxokを含めて3つ以外
                     if (subroutine.Count != 3)
                     {
                         throw new ApplicationException("Invalid arguments of 'xok'");
                     }
 
+                    // インポート関数名のチェック
                     CheckSubroutineName(subroutineName);
 
+                    // インポート定義の第2引数が10進数値ではない
                     if(subroutine[2].Any(x => !char.IsDigit(x)))
                     {
                         throw new ApplicationException($"Invalid argument's count: {subroutine[2]}");
@@ -236,14 +247,18 @@ namespace Cent.Core
                 }
                 else
                 {
+                    // サブルーチン関数名のチェック
                     CheckSubroutineName(subroutineName);
+                    // サブルーチンのコードチェック
                     CheckCode(subroutine.Skip(1));
                 }
             }
 
-            CheckCode(this.operations);
+            // コードチェック
+            CheckCode(this.tokens);
         }
 
+        // サブルーチンの関数名が使用可能なものかどうかのチェック
         private void CheckSubroutineName(string subroutineName)
         {
             if (char.IsDigit(subroutineName[0]) || subroutineName.Any(x => x == '<' || x == '>')
@@ -254,6 +269,10 @@ namespace Cent.Core
             }
         }
 
+        /// <summary>
+        /// 制御文の対応チェック
+        /// </summary>
+        /// <param name="code"></param>
         private void CheckCode(IEnumerable<string> code)
         {
             int falCount = 0;
@@ -313,6 +332,239 @@ namespace Cent.Core
             }
         }
 
-        abstract protected void Write(string outFileName);
+        /// <summary>
+        /// 変換先出力
+        /// </summary>
+        /// <param name="outFileName"></param>
+        protected void Write(string outFileName)
+        {
+            foreach (var subrt in this.subroutines)
+            {
+                if (subrt[0] == "xok")
+                {
+                    this.funcNames.Add(subrt[1], uint.Parse(subrt[2]));
+                }
+                else
+                {
+                    this.subroutineNames.Add(subrt[0]);
+                }
+            }
+            
+            PreProcess(outFileName);
+            foreach (var token in this.tokens)
+            {
+                WriteTokens(token);
+            }
+            PostProcess(outFileName);
+        }
+
+        private void WriteTokens(string token)
+        {
+            // 全て10進数値であれば数値
+            if (uint.TryParse(token, out uint result))
+            {
+                Value(result);
+            }
+            // サブルーチンに登録されている名称であれば
+            else if (this.subroutineNames.Contains(token))
+            {
+                if (this.callSubroutines.Contains(token))
+                {
+                    throw new ApplicationException("Not support recursive subroutine");
+                }
+
+                this.callSubroutines.Push(token);
+                foreach (var subToken in this.subroutines.Where(x => x[0] == token).Single().Skip(1))
+                {
+                    WriteTokens(subToken);
+                }
+                this.callSubroutines.Pop();
+            }
+            // 外部関数に登録されている名称であれば
+            else if (this.funcNames.ContainsKey(token))
+            {
+                Fenxe(token, this.funcNames[token]);
+            }
+            else
+            {
+                switch (token)
+                {
+                    case "nac":
+                        Nac();
+                        break;
+                    case "sna":
+                        Sna();
+                        break;
+                    case "ata":
+                        Ata();
+                        break;
+                    case "nta":
+                        Nta();
+                        break;
+                    case "ada":
+                        Ada();
+                        break;
+                    case "ekc":
+                        Ekc();
+                        break;
+                    case "dto":
+                        Dto();
+                        break;
+                    case "dro":
+                    case "dRo":
+                        Dro();
+                        break;
+                    case "dtosna":
+                        Dtosna();
+                        break;
+                    case "dal":
+                        Dal();
+                        break;
+                    case "lat":
+                        Lat();
+                        break;
+                    case "latsna":
+                        Latsna();
+                        break;
+                    case "xtlo":
+                        Xtlo();
+                        break;
+                    case "xylo":
+                        Xylo();
+                        break;
+                    case "clo":
+                        Clo();
+                        break;
+                    case "niv":
+                        Niv();
+                        break;
+                    case "llo":
+                        Llo();
+                        break;
+                    case "xolo":
+                        Xolo();
+                        break;
+                    case "xtlonys":
+                        Xtlonys();
+                        break;
+                    case "xylonys":
+                        Xylonys();
+                        break;
+                    case "llonys":
+                        Llonys();
+                        break;
+                    case "xolonys":
+                        Xolonys();
+                        break;
+                    case "krz":
+                    case "kRz":
+                        Krz();
+                        break;
+                    case "ach":
+                        Ach();
+                        break;
+                    case "roft":
+                        Roft();
+                        break;
+                    case "ycax":
+                        Ycax();
+                        break;
+                    case "pielyn":
+                        Pielyn();
+                        break;
+                    case "fal":
+                        Fal();
+                        break;
+                    case "laf":
+                        Laf();
+                        break;
+                    case "fi":
+                        Fi();
+                        break;
+                    case "ol":
+                        Ol();
+                        break;
+                    case "if":
+                        If();
+                        break;
+                    case "cecio":
+                        Cecio();
+                        break;
+                    case "oicec":
+                        Oicec();
+                        break;
+                    case "kinfit":
+                        Kinfit();
+                        break;
+                    case "tikl":
+                        Tikl();
+                        break;
+                    case "lykl":
+                    default:
+                        throw new ApplicationException($"Unknown word: '{token}'");
+                }
+            }
+        }
+        
+        protected abstract void PreProcess(string outFileName);
+        protected abstract void PostProcess(string outFileName);
+
+        protected abstract void Value(uint result);
+        protected abstract void Fenxe(string funcName, uint argc);
+        protected abstract void Nac();
+        protected abstract void Sna();
+        protected abstract void Ata();
+        protected abstract void Nta();
+        protected abstract void Ada();
+        protected abstract void Ekc();
+        protected abstract void Dto();
+        protected abstract void Dro();
+        protected abstract void Dtosna();
+        protected abstract void Dal();
+        protected abstract void Lat();
+        protected abstract void Latsna();
+        protected abstract void Xtlo();
+        protected abstract void Xylo();
+        protected abstract void Clo();
+        protected abstract void Niv();
+        protected abstract void Llo();
+        protected abstract void Xolo();
+        protected abstract void Xtlonys();
+        protected abstract void Xylonys();
+        protected abstract void Llonys();
+        protected abstract void Xolonys();
+        protected abstract void Krz();
+        protected abstract void Ach();
+        protected abstract void Roft();
+        protected abstract void Ycax();
+        protected abstract void Pielyn();
+        protected abstract void Fal();
+        protected abstract void Laf();
+        protected abstract void Fi();
+        protected abstract void Ol();
+        protected abstract void If();
+        protected abstract void Cecio();
+        protected abstract void Oicec();
+        protected abstract void Kinfit();
+        protected abstract void Tikl();
+        
+        /// <summary>
+        /// 字句解析・コードチェック後のコード出力(デバッグ用)
+        /// </summary>
+        private void ListingTokens()
+        {
+            Console.WriteLine("main: {0}", this.tokens.Aggregate(new StringBuilder("["),
+                (x, y) => x.Append(y).Append(", "),
+                x => x.Append("]").ToString()));
+
+            Console.WriteLine("subroutines: {0}", this.subroutines.Aggregate(new StringBuilder("["),
+                (x, y) => x.Append(
+                    y.Aggregate(new StringBuilder("["),
+                        (z, w) => z.Append(w).Append(", "),
+                        z => z.Append("]").ToString())
+                    ).Append(", "),
+                x => x.Append("]").ToString()));
+        }
+
     }
 }

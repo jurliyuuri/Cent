@@ -1,338 +1,339 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Cent.Core
 {
     class CentToLua64 : CentTranscompiler
     {
-
-        readonly List<string> subroutineNames;
-        readonly Dictionary<string, int> funcNames;
-        readonly Stack<string> jumpLabelStack;
-        readonly Stack<string> callSubroutines;
-        StringBuilder indent;
-
-        public CentToLua64(List<string> inFileNames) : base(inFileNames)
+        readonly StringBuilder indent;
+        readonly StringBuilder writer;
+        
+        public CentToLua64(IList<string> inFileNames) : base(inFileNames)
         {
-            subroutineNames = new List<string>();
-            funcNames = new Dictionary<string, int>();
-            jumpLabelStack = new Stack<string>();
-            callSubroutines = new Stack<string>();
             indent = new StringBuilder("");
+            writer = new StringBuilder();
         }
 
-        public CentToLua64(string[] inFileNames) : this(inFileNames.ToList())
-        {
-        }
+        public CentToLua64(string[] inFileNames) : this(inFileNames.ToList()) { }
 
-        protected override void Write(string outFileName)
+        protected override void PreProcess(string outFileName)
         {
-            using (var writer = new StringWriter())
+            if(this.funcNames.Any())
             {
-                bool isXok = false;
-                foreach (var subrt in this.subroutines)
-                {
-                    if (subrt[0] == "xok")
-                    {
-                        var argc = int.Parse(subrt[2]);
-                        this.funcNames.Add(subrt[1], argc);
+                this.writer.AppendLine("require(\"centxok\")");
+            }
 
-                        isXok = true;
-                    }
-                    else
-                    {
-                        this.subroutineNames.Add(subrt[0]);
-                    }
-                }
+            this.writer.AppendLine("local function to32(num)")
+                .AppendLine("  return num & 0x00000000FFFFFFFF")
+                .AppendLine("end")
+                .AppendLine("local function to64s(num)")
+                .AppendLine("  return num | ((-(to32(num) >> 31)) & 0xFFFFFFFF00000000)")
+                .AppendLine("end")
+                .AppendLine("local stack = {}")
+                .AppendLine("local t1, t2 = nil, nil");
+            this.indent.Append("  ");
+        }
 
-                if(isXok)
-                {
-                    writer.WriteLine("require(\"centxok\")");
-                }
+        protected override void PostProcess(string outFileName)
+        {
+            this.writer.AppendLine("print(\"[\" .. table.concat(stack, \",\") .. \"]\")");
 
-                writer.WriteLine("function to32(num){0}  return num & 0x00000000FFFFFFFF{0}end", Environment.NewLine);
-                writer.WriteLine("function to64s(num){0}  return num | ((-(to32(num) >> 31)) & 0xFFFFFFFF00000000){0}end", Environment.NewLine);
-                writer.WriteLine("local stack = {}");
-                writer.WriteLine("local t1, t2 = nil, nil");
-                
-                foreach (var item in this.operations)
-                {
-                    WriteOperation(writer, item);
-                }
-
-                writer.WriteLine("print(\"[\" .. table.concat(stack, \",\") .. \"]\")");
-                
-                using (var file = new StreamWriter(outFileName, false, new UTF8Encoding(false)))
-                {
-                    file.Write(writer.ToString());
-                }
+            using (var file = new StreamWriter(outFileName, false, new UTF8Encoding(false)))
+            {
+                file.Write(this.writer.ToString());
             }
         }
 
-        private void WriteOperation(StringWriter writer, string item)
+        protected override void Fenxe(string funcName, uint argc)
         {
-            if (item.All(x => char.IsDigit(x)))
+            if (argc == 0)
             {
-                writer.WriteLine("{1}table.insert(stack, {0} & 0x000000FFFFFF)", item, indent);
-            }
-            else if (operatorMap.ContainsKey(item))
-            {
-                writer.WriteLine(FromOperator(item));
-            }
-            else if (centOperatorMap.ContainsKey(item))
-            {
-                writer.WriteLine(FromCentOperator(item, centOperatorMap[item]));
-            }
-            else if (compareMap.ContainsKey(item))
-            {
-                writer.WriteLine(FromCompareOperator(item, compareMap[item]));
-            }
-            else if (this.subroutineNames.Contains(item))
-            {
-                if (this.callSubroutines.Contains(item))
-                {
-                    throw new ApplicationException("Not support recursive subroutine");
-                }
-
-                this.callSubroutines.Push(item);
-                writer.WriteLine("{1}-- start {0} --", item, indent);
-
-                foreach (var funcItem in this.subroutines.Where(x => x[0] == item).Single().Skip(1))
-                {
-                    WriteOperation(writer, funcItem);
-                }
-
-                writer.WriteLine("{1}-- end {0} --", item, indent);
-                this.callSubroutines.Pop();
-            }
-            else if (this.funcNames.ContainsKey(item))
-            {
-                int argc = this.funcNames[item];
-                if(argc == 0)
-                {
-                    writer.WriteLine("{0}t1 = {1}()", indent, item);
-                    writer.WriteLine("{0}table.insert(stack, t1)", indent);
-                }
-                else
-                {
-                    writer.WriteLine("{0}t1 = {{}}", indent);
-                    for (int i = 1; i <= argc; i++)
-                    {
-                        writer.WriteLine("{0}table.insert(t1, 1, table.remove(stack))", indent);
-                    }
-                    writer.WriteLine("{0}t1 = {1}(table.unpack(t1))", indent, item);
-                    writer.WriteLine("{0}table.insert(stack, t1)", indent);
-                }
+                this.writer.Append(this.indent).Append("t1 = ")
+                    .Append(funcName).AppendLine("()")
+                    .Append(this.indent).AppendLine("table.insert(stack, t1)");
             }
             else
             {
-                throw new ApplicationException($"Unknown word: '{item}'");
+                this.writer.Append(this.indent).AppendLine("t1 = {{}}");
+                for (int i = 1; i <= argc; i++)
+                {
+                    this.writer.Append(this.indent).AppendLine("table.insert(t1, 1, table.remove(stack))");
+                }
+                this.writer.Append(this.indent).Append("t1 = ")
+                    .Append(funcName).AppendLine("(table.unpack(t1))")
+                    .Append(this.indent).AppendLine("table.insert(stack, t1)");
             }
         }
 
-        private string FromOperator(string operation)
+        protected override void Value(uint result)
         {
-            if (operation == "kak")
-            {
-                throw new ApplicationException("Sorry, not support this keyword");
-            }
-
-            switch (operation)
-            {
-                case "nac":
-                    return indent + "stack[#stack] = to32(~stack[#stack])";
-                case "sna":
-                    return indent + "stack[#stack] = to32(-stack[#stack])";
-                case "ata":
-                    return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32(t2 + t1)";
-                case "nta":
-                    return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32(t2 - t1)";
-                case "ada":
-                    return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32(t2 & t1)";
-                case "ekc":
-                    return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32(t2 | t1)";
-                case "dto":
-                    return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32(t2 >> t1)";
-                case "dro":
-                case "dRo":
-                    return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32(t2 << t1)";
-                case "dtosna":
-                    return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32(to64s(t2) >> t1)";
-                case "dal":
-                    return indent + "t1, t2 = table.remove(stack), stack[#stack]" + Environment.NewLine +
-                        indent + "stack[#stack] = to32((t2 & t1) | (~t2 & ~t1))";
-                case "lat":
-                    return indent + "t1, t2 = stack[#stack], stack[#stack - 1]" + Environment.NewLine +
-                        indent + "t1 = t1 * t2" + Environment.NewLine +
-                        indent + "stack[#stack], stack[#stack - 1] = to32(t1), to32(t1 >> 32)";
-                case "latsna":
-                    return indent + "t1, t2 = stack[#stack], stack[#stack - 1]" + Environment.NewLine +
-                        indent + "t1 = to64s(t1) * to64s(t2)" + Environment.NewLine +
-                        indent + "stack[#stack], stack[#stack - 1] = to32(t1), to32(t1 >> 32)";
-                default:
-                    throw new ApplicationException($"Invalid operation: {operation}");
-            }
+            this.writer.Append(this.indent).Append("table.insert(stack, ")
+                .Append(result).AppendLine(" & 0x000000FFFFFF)");
         }
 
-        private string FromCompareOperator(string operation, int operandCount)
+        protected override void Nac()
         {
-            switch (operation)
-            {
-                case "xtlo":
-                    return indent + "t1, t2 = to64s(table.remove(stack)), to64s(table.remove(stack))" + Environment.NewLine +
-                        indent + "if t2 <= t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "xylo":
-                    return indent + "t1, t2 = to64s(table.remove(stack)), to64s(table.remove(stack))" + Environment.NewLine +
-                        indent + "if t2 < t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "clo":
-                    return indent + "t1, t2 = table.remove(stack), table.remove(stack)" + Environment.NewLine +
-                        indent + "if t2 == t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "niv":
-                    return indent + "t1, t2 = table.remove(stack), table.remove(stack)" + Environment.NewLine +
-                        indent + "if t2 ~= t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "llo":
-                    return indent + "t1, t2 = to64s(table.remove(stack)), to64s(table.remove(stack))" + Environment.NewLine +
-                        indent + "if t2 > t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "xolo":
-                    return indent + "t1, t2 = to64s(table.remove(stack)), to64s(table.remove(stack))" + Environment.NewLine +
-                        indent + "if t2 >= t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "xtlonys":
-                    return indent + "t1, t2 = table.remove(stack), table.remove(stack)" + Environment.NewLine +
-                        indent + "if t2 <= t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "xylonys":
-                    return indent + "t1, t2 = table.remove(stack), table.remove(stack)" + Environment.NewLine +
-                        indent + "if t2 < t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "llonys":
-                    return indent + "t1, t2 = table.remove(stack), table.remove(stack)" + Environment.NewLine +
-                        indent + "if t2 > t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                case "xolonys":
-                    return indent + "t1, t2 = table.remove(stack), table.remove(stack)" + Environment.NewLine +
-                        indent + "if t2 >= t1 then " + Environment.NewLine +
-                        indent + "  table.insert(stack, 1)" + Environment.NewLine +
-                        indent + "else" + Environment.NewLine +
-                        indent + "  table.insert(stack, 0)" + Environment.NewLine +
-                        indent + "end";
-                default:
-                    throw new ApplicationException($"Invalid operation: {operation}");
-            }
+            this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(~stack[#stack])");
         }
 
-        private string FromCentOperator(string operation, int operandCount)
+        protected override void Sna()
         {
-            switch (operation)
-            {
-                case ".":
-                    return indent + "print(table.remove(stack))";
-                case "krz":
-                case "kRz":
-                    return indent + "table.insert(stack, stack[#stack])";
-                case "ach":
-                    return indent + "stack[#stack - 1], stack[#stack] = stack[#stack], stack[#stack - 1]";
-                case "roft":
-                    return indent + "stack[#stack - 2], stack[#stack - 1], stack[#stack]" +
-                        " = stack[#stack - 1], stack[#stack], stack[#stack - 2]";
-                case "ycax":
-                    return indent + "table.remove(stack)";
-                case "pielyn":
-                    return indent + "stack = {}";
-                case "fal":
-                    {
-                        string oldIndent = indent.ToString();
-                        indent.Append("  ");
+            this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(-stack[#stack])");
+        }
 
-                        return oldIndent + "while stack[#stack] ~= 0 do";
-                    }
-                case "laf":
-                    {
-                        indent.Remove(indent.Length - 2, 2);
+        protected override void Ata()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(t2 + t1)");
+        }
 
-                        return indent + "end";
-                    }
-                case "fi":
-                    {
-                        string oldIndent = indent.ToString();
-                        indent.Append("  ");
+        protected override void Nta()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(t2 - t1)");
+        }
 
-                        return oldIndent + "if stack[#stack] ~= 0 then";
-                    }
-                case "ol":
-                    {
-                        string oldIndent = indent.ToString().Remove(indent.Length - 2);
+        protected override void Ada()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(t2 & t1)");
+        }
 
-                        return oldIndent + "else";
-                    }
-                case "if":
-                    {
-                        indent.Remove(indent.Length - 2, 2);
+        protected override void Ekc()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(t2 | t1)");
+        }
 
-                        return indent + "end";
-                    }
-                case "cecio":
-                    {
-                        string oldIndent = indent.ToString();
-                        indent.Append("  ");
+        protected override void Dto()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(t2 >> t1)");
+        }
 
-                        return oldIndent + "while stack[#stack] <= stack[#stack - 1] do";
-                    }
-                case "oicec":
-                    {
-                        indent.Remove(indent.Length - 2, 2);
+        protected override void Dro()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(t2 << t1)");
+        }
 
-                        return indent + "  stack[#stack] = stack[#stack] + 1" + Environment.NewLine + 
-                            indent + "end";
-                    }
-                case "kinfit":
-                    return indent + "table.insert(stack, #stack)";
-                default:
-                    throw new ApplicationException($"Invalid operation: {operation}");
-            }
+        protected override void Dtosna()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(to64s(t2) >> t1)");
+        }
+
+        protected override void Dal()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] =  to32((t2 & t1) | (~t2 & ~t1))");
+        }
+
+        protected override void Lat()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = stack[#stack], stack[#stack - 1]")
+                .Append(this.indent).AppendLine("t1 = t1 * t2")
+                .Append(this.indent).AppendLine("stack[#stack], stack[#stack - 1] = to32(t1), to32(t1 >> 32)");
+        }
+
+        protected override void Latsna()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = stack[#stack], stack[#stack - 1]")
+                .Append(this.indent).AppendLine("t1 =  to64s(t1) * to64s(t2)")
+                .Append(this.indent).AppendLine("stack[#stack], stack[#stack - 1] = to32(t1), to32(t1 >> 32)");
+        }
+
+        protected override void Xtlo()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = to64s(table.remove(stack)), to64s(table.remove(stack))")
+                .Append(this.indent).AppendLine("if t2 <= t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Xylo()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = to64s(table.remove(stack)), to64s(table.remove(stack))")
+                .Append(this.indent).AppendLine("if t2 < t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Clo()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), table.remove(stack)")
+                .Append(this.indent).AppendLine("if t2 == t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Niv()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), table.remove(stack)")
+                .Append(this.indent).AppendLine("if t2 ~= t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Llo()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = to64s(table.remove(stack)), to64s(table.remove(stack))")
+                .Append(this.indent).AppendLine("if t2 > t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Xolo()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = to64s(table.remove(stack)), to64s(table.remove(stack))")
+                .Append(this.indent).AppendLine("if t2 >= t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Xtlonys()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), table.remove(stack)")
+                .Append(this.indent).AppendLine("if t2 <= t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Xylonys()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), table.remove(stack)")
+                .Append(this.indent).AppendLine("if t2 < t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Llonys()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), table.remove(stack)")
+                .Append(this.indent).AppendLine("if t2 > t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Xolonys()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), table.remove(stack)")
+                .Append(this.indent).AppendLine("if t2 >= t1 then ")
+                .Append(this.indent).AppendLine("  table.insert(stack, 1)")
+                .Append(this.indent).AppendLine("else")
+                .Append(this.indent).AppendLine("  table.insert(stack, 0)")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Tikl()
+        {
+            this.writer.Append(this.indent).AppendLine("print(table.remove(stack))");
+        }
+
+        protected override void Krz()
+        {
+            this.writer.Append(this.indent).AppendLine("table.insert(stack, stack[#stack])");
+        }
+
+        protected override void Ach()
+        {
+            this.writer.Append(this.indent)
+                .AppendLine("stack[#stack - 1], stack[#stack] = stack[#stack], stack[#stack - 1]");
+        }
+
+        protected override void Roft()
+        {
+            this.writer.Append(this.indent)
+                .Append("stack[#stack - 2], stack[#stack - 1], stack[#stack]")
+                .AppendLine(" = stack[#stack - 1], stack[#stack], stack[#stack - 2]");
+        }
+
+        protected override void Ycax()
+        {
+            this.writer.Append(this.indent).AppendLine("table.remove(stack)");
+        }
+
+        protected override void Pielyn()
+        {
+            this.writer.Append(this.indent).AppendLine("stack = {}");
+        }
+
+        protected override void Fal()
+        {
+            string oldIndent = this.indent.ToString();
+            this.indent.Append("  ");
+
+            this.writer.Append(oldIndent).AppendLine("while stack[#stack] ~= 0 do");
+        }
+
+        protected override void Laf()
+        {
+            this.indent.Remove(this.indent.Length - 2, 2);
+
+            this.writer.Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Fi()
+        {
+            string oldIndent = this.indent.ToString();
+            this.indent.Append("  ");
+
+            this.writer.Append(oldIndent).AppendLine("if stack[#stack] ~= 0 then");
+        }
+
+        protected override void Ol()
+        {
+            string oldIndent = indent.ToString().Remove(indent.Length - 2);
+
+            this.writer.Append(oldIndent).AppendLine("else");
+        }
+
+        protected override void If()
+        {
+            this.indent.Remove(this.indent.Length - 2, 2);
+
+            this.writer.Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Cecio()
+        {
+            string oldIndent = this.indent.ToString();
+            this.indent.Append("  ");
+
+            this.writer.Append(oldIndent).AppendLine("while stack[#stack] <= stack[#stack - 1] do");
+        }
+
+        protected override void Oicec()
+        {
+            this.indent.Remove(this.indent.Length - 2, 2);
+
+            this.writer.Append(this.indent).AppendLine("  stack[#stack] = stack[#stack] + 1")
+                .Append(this.indent).AppendLine("end");
+        }
+
+        protected override void Kinfit()
+        {
+            this.writer.Append(this.indent).AppendLine("table.insert(stack, #stack)");
         }
     }
 }

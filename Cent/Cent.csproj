@@ -48,12 +48,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\CentToLua64.cs" />
+    <Compile Include="Core\CentToWin64Nasm.cs" />
     <Compile Include="Core\CentToUbplBinary.cs" />
     <Compile Include="Core\CentTo2003fBinary.cs" />
-    <Compile Include="Core\CentToWat.cs" />
     <Compile Include="Core\CentTo2003lk.cs" />
-    <Compile Include="Core\CentCompiler.cs" />
+    <Compile Include="Core\CentToLua64.cs" />
+    <Compile Include="Core\CentToWat.cs" />
     <Compile Include="Core\CentTranscompiler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

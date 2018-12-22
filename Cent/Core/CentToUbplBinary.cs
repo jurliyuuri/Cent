@@ -1,34 +1,234 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UbplCommon.Translator;
 
 namespace Cent.Core
 {
-    class CentToUbplBinary : CodeGenerator
+    class CentToUbplBinary : CentTranscompiler
     {
-        readonly List<string> subroutineNames;
-        readonly Dictionary<string, int> funcNames;
-        readonly Stack<string> jumpLabelStack;
-        readonly Stack<string> callSubroutines;
+        readonly BinaryUbplCreator creator;
+
+        public CentToUbplBinary(List<string> inFileNames) : base(inFileNames)
+        {
+            this.creator = new BinaryUbplCreator();
+        }
+
+        public CentToUbplBinary(string[] inFileNames) : this(inFileNames.ToList())
+        {
+        }
+
+        protected override void PreProcess(string outFileName)
+        {
+            this.creator.PreProcess();
+        }
+
+        protected override void PostProcess(string outFileName)
+        {
+            this.creator.PostProcess();
+            this.creator.Write(outFileName);
+        }
+
+        protected override void Fenxe(string funcName, uint argc)
+        {
+            this.creator.Fenxe(funcName, argc);
+        }
+
+        protected override void Value(uint result)
+        {
+            this.creator.Value(result);
+        }
+
+        protected override void Nac()
+        {
+            this.creator.Nac();
+        }
+
+        protected override void Sna()
+        {
+            this.creator.Sna();
+        }
+
+        protected override void Ata()
+        {
+            this.creator.Ata();
+        }
+
+        protected override void Nta()
+        {
+            this.creator.Nta();
+        }
+
+        protected override void Ada()
+        {
+            this.creator.Ada();
+        }
+
+        protected override void Ekc()
+        {
+            this.creator.Ekc();
+        }
+
+        protected override void Dto()
+        {
+            this.creator.Dto();
+        }
+
+        protected override void Dro()
+        {
+            this.creator.Dro();
+        }
+
+        protected override void Dtosna()
+        {
+            this.creator.Dtosna();
+        }
+
+        protected override void Dal()
+        {
+            this.creator.Dal();
+        }
+
+        protected override void Lat()
+        {
+            this.creator.Lat();
+        }
+
+        protected override void Latsna()
+        {
+            this.creator.Latsna();
+        }
+
+        protected override void Xtlo()
+        {
+            this.creator.Xtlo();
+        }
+
+        protected override void Xylo()
+        {
+            this.creator.Xylo();
+        }
+
+        protected override void Clo()
+        {
+            this.creator.Clo();
+        }
+
+        protected override void Niv()
+        {
+            this.creator.Niv();
+        }
+
+        protected override void Llo()
+        {
+
+            this.creator.Llo();
+        }
+
+        protected override void Xolo()
+        {
+            this.creator.Xolo();
+        }
+
+        protected override void Xtlonys()
+        {
+            this.creator.Xtlonys();
+        }
+
+        protected override void Xylonys()
+        {
+            this.creator.Xylonys();
+        }
+
+        protected override void Llonys()
+        {
+            this.creator.Llonys();
+        }
+
+        protected override void Xolonys()
+        {
+            this.creator.Xolonys();
+        }
+
+        protected override void Tikl()
+        {
+            this.creator.Tikl();
+        }
+
+        protected override void Krz()
+        {
+            this.creator.Krz();
+        }
+
+        protected override void Ach()
+        {
+            this.creator.Ach();
+        }
+
+        protected override void Roft()
+        {
+            this.creator.Roft();
+        }
+
+        protected override void Ycax()
+        {
+            this.creator.Ycax();
+        }
+
+        protected override void Pielyn()
+        {
+            this.creator.Pielyn();
+        }
+
+        protected override void Fal()
+        {
+            this.creator.Fal();
+        }
+
+        protected override void Laf()
+        {
+            this.creator.Laf();
+        }
+
+        protected override void Fi()
+        {
+            this.creator.Fi();
+        }
+
+        protected override void Ol()
+        {
+            this.creator.Ol();
+        }
+
+        protected override void If()
+        {
+            this.creator.If();
+        }
+
+        protected override void Cecio()
+        {
+            this.creator.Cecio();
+        }
+
+        protected override void Oicec()
+        {
+            this.creator.Oicec();
+        }
+
+        protected override void Kinfit()
+        {
+            this.creator.Kinfit();
+        }
+    }
+
+    class BinaryUbplCreator : CodeGenerator
+    {
         readonly Dictionary<string, int> labelCount;
         readonly Dictionary<string, bool> kuexok;
+        readonly Stack<string> jumpLabelStack;
 
-        public IList<string> OperatorList { get; set; }
-        public IList<string> CentOperatorList { get; set; }
-        public IList<string> CompareList { get; set; }
-        public IList<string> Operations { get; set; }
-        public IList<List<string>> Subroutines { get; set; }
-
-
-        public CentToUbplBinary() : base()
+        public BinaryUbplCreator() : base()
         {
-            subroutineNames = new List<string>();
-            funcNames = new Dictionary<string, int>();
-            jumpLabelStack = new Stack<string>();
-            callSubroutines = new Stack<string>();
             labelCount = new Dictionary<string, int>()
             {
                 ["cecio"] = 0,
@@ -37,206 +237,115 @@ namespace Cent.Core
                 ["leles"] = 0,
             };
             kuexok = new Dictionary<string, bool>();
+            jumpLabelStack = new Stack<string>();
         }
 
-        public void Execute()
+        public void PreProcess()
         {
-            foreach (var subrt in this.Subroutines)
-            {
-                if (subrt[0] == "xok")
-                {
-                    this.kuexok[subrt[1]] = true;
-                    this.funcNames.Add(subrt[1], int.Parse(subrt[2]));
-                }
-                else
-                {
-                    this.subroutineNames.Add(subrt[0]);
-                }
-            }
-
             Nta(4, F5);
             Krz(F1, Seti(F5));
             Krz(F5, F1);
+        }
 
-            foreach (var item in this.Operations)
-            {
-                WriteOperation(item);
-            }
-
+        public void PostProcess()
+        {
             Krz(F1, F5);
             Krz(Seti(F5), F1);
             Ata(4, F5);
             Krz(Seti(F5), XX);
         }
 
-        private void WriteOperation(string item)
+        public void Fenxe(string funcName, uint argc)
         {
-            if (item.All(char.IsDigit))
+            if (argc == 0)
             {
                 Nta(4, F5);
-                Krz(uint.Parse(item), Seti(F5));
-            }
-            else if (this.OperatorList.Contains(item))
-            {
-                FromOperator(item);
-            }
-            else if (this.CentOperatorList.Contains(item))
-            {
-                FromCentOperator(item);
-            }
-            else if (this.CompareList.Contains(item))
-            {
-                FromCompareOperator(item);
-            }
-            else if (this.subroutineNames.Contains(item))
-            {
-                if (this.callSubroutines.Contains(item))
-                {
-                    throw new ApplicationException("Not support recursive subroutine");
-                }
-
-                this.callSubroutines.Push(item);
-                foreach (var funcItem in this.Subroutines.Where(x => x[0] == item).Single().Skip(1))
-                {
-                    WriteOperation(funcItem);
-                }
-                this.callSubroutines.Pop();
-            }
-            else if (this.funcNames.ContainsKey(item))
-            {
-                var argc = this.funcNames[item];
-                if (argc == 0)
-                {
-                    Nta(4, F5);
-                    Fnx(item, Seti(F5));
-                    Krz(F0, Seti(F5));
-                }
-                else
-                {
-                    Nta(4, F5);
-                    Fnx(item, Seti(F5));
-                    Ata((uint)(argc * 4), F5);
-                    Krz(F0, Seti(F5));
-                }
+                Fnx(funcName, Seti(F5));
+                Krz(F0, Seti(F5));
             }
             else
             {
-                throw new ApplicationException($"Unknown word: '{item}'");
+                Nta(4, F5);
+                Fnx(funcName, Seti(F5));
+                Ata(argc * 4, F5);
+                Krz(F0, Seti(F5));
             }
         }
 
-        private void FromOperator(string operation)
+        public void Value(uint result)
         {
-            if (operation == "kak")
-            {
-                throw new ApplicationException($"Sorry, not support this keyword: {operation}");
-            }
-
-            uint pop = 0U;
-            switch (operation)
-            {
-                case "nac":
-                    Dal(0, Seti(F5));
-                    break;
-                case "sna":
-                    Dal(0, Seti(F5));
-                    Ata(1, Seti(F5));
-                    break;
-                case "ata":
-                    Ata(Seti(F5), Seti(F5 + 4));
-                    pop = 1;
-                    break;
-                case "nta":
-                    Nta(Seti(F5), Seti(F5 + 4));
-                    pop = 1;
-                    break;
-                case "kak":
-                    throw new ApplicationException($"Sorry, not support this keyword");
-                case "ada":
-                    Ada(Seti(F5), Seti(F5 + 4));
-                    pop = 1;
-                    break;
-                case "ekc":
-                    Ekc(Seti(F5), Seti(F5 + 4));
-                    pop = 1;
-                    break;
-                case "dal":
-                    Dal(Seti(F5), Seti(F5 + 4));
-                    pop = 1;
-                    break;
-                case "dto":
-                    Dto(Seti(F5), Seti(F5 + 4));
-                    pop = 1;
-                    break;
-                case "dtosna":
-                    Dtosna(Seti(F5), Seti(F5 + 4));
-                    pop = 1;
-                    break;
-                case "dro":
-                case "dRo":
-                    Dro(Seti(F5), Seti(F5 + 4));
-                    pop = 1;
-                    break;
-                case "lat":
-                    Lat(Seti(F5), Seti(F5 + 4));
-                    Anf(Seti(F5 + 4), Seti(F5));
-                    break;
-                case "latsna":
-                    Latsna(Seti(F5), Seti(F5 + 4));
-                    Anf(Seti(F5 + 4), Seti(F5));
-                    break;
-                default:
-                    throw new ApplicationException($"Invalid operation: {operation}");
-            }
-
-            if (pop > 0)
-            {
-                Ata(pop * 4, F5);
-            }
+            Nta(4, F5);
+            Krz(result, Seti(F5));
         }
 
-        private void FromCompareOperator(string operation)
+        public void Nac()
+        {
+            Dal(0, Seti(F5));
+        }
+
+        public void Sna()
+        {
+            Dal(0, Seti(F5));
+            Ata(1, Seti(F5));
+        }
+
+        public void Ata()
+        {
+            Ata(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Nta()
+        {
+            Nta(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Ada()
+        {
+            Ada(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Ekc()
+        {
+            Ekc(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Dto()
+        {
+            Dto(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Dro()
+        {
+            Dro(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Dtosna()
+        {
+            Dtosna(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Dal()
+        {
+            Dal(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Lat()
+        {
+            Lat(Seti(F5), Seti(F5 + 4));
+            Anf(Seti(F5 + 4), Seti(F5));
+        }
+
+        public void Latsna()
+        {
+            Latsna(Seti(F5), Seti(F5 + 4));
+            Anf(Seti(F5 + 4), Seti(F5));
+        }
+
+        private void Compare(FiType type)
         {
             int count = this.labelCount["leles"];
             this.labelCount["leles"] = ++count;
-
-            FiType type;
-            switch (operation)
-            {
-                case "xtlo":
-                    type = XTLO;
-                    break;
-                case "xylo":
-                    type = XYLO;
-                    break;
-                case "clo":
-                    type = CLO;
-                    break;
-                case "niv":
-                    type = NIV;
-                    break;
-                case "llo":
-                    type = LLO;
-                    break;
-                case "xolo":
-                    type = XOLO;
-                    break;
-                case "xtlonys":
-                    type = XTLONYS;
-                    break;
-                case "xylonys":
-                    type = XYLONYS;
-                    break;
-                case "llonys":
-                    type = LLONYS;
-                    break;
-                case "xolonys":
-                    type = XOLONYS;
-                    break;
-                default:
-                    throw new ApplicationException($"Invalid operation: {operation}");
-            }
-
+            
             Fi(Seti(F5), Seti(F5 + 4), type);
             Malkrz($"leles@niv{count}", XX);
             Krz(0, Seti(F5 + 4));
@@ -247,116 +356,183 @@ namespace Cent.Core
             Ata(4, F5);
         }
 
-        private void FromCentOperator(string operation)
+        public void Xtlo()
         {
-            string label;
-            switch (operation)
+            Compare(XTLO);
+        }
+
+        public void Xylo()
+        {
+            Compare(XYLO);
+        }
+
+        public void Clo()
+        {
+            Compare(CLO);
+        }
+
+        public void Niv()
+        {
+            Compare(NIV);
+        }
+
+        public void Llo()
+        {
+            Compare(LLO);
+        }
+
+        public void Xolo()
+        {
+            Compare(XOLO);
+        }
+
+        public void Xtlonys()
+        {
+            Compare(XTLONYS);
+        }
+
+        public void Xylonys()
+        {
+            Compare(XYLONYS);
+        }
+
+        public void Llonys()
+        {
+            Compare(LLONYS);
+        }
+
+        public void Xolonys()
+        {
+            Compare(XOLONYS);
+        }
+
+        public void Tikl()
+        {
+            Fnx(UbplCommon.UbplConstant.TVARLON_KNLOAN_ADDRESS, Seti(F5));
+            Ata(4, F5);
+        }
+
+        public void Krz()
+        {
+            Nta(4, F5);
+            Krz(Seti(F5 + 4), Seti(F5));
+        }
+
+        public void Ach()
+        {
+            Mte(Seti(F5), Seti(F5 + 4));
+            Anf(Seti(F5), Seti(F5 + 4));
+        }
+
+        public void Roft()
+        {
+            Krz(Seti(F5 + 8), F0);
+            Mte(Seti(F5), Seti(F5 + 4));
+            Anf(Seti(F5 + 8), Seti(F5 + 4));
+            Krz(F0, Seti(F5));
+        }
+
+        public void Ycax()
+        {
+            Ata(4, F5);
+        }
+
+        public void Pielyn()
+        {
+            Krz(F1, F5);
+        }
+
+        public void Fal()
+        {
+            this.labelCount["fal"] += 1;
+
+            this.jumpLabelStack.Push($"laf@{this.labelCount["fal"]}");
+            this.jumpLabelStack.Push($"fal@{this.labelCount["fal"]}");
+
+            Nll($"fal@{this.labelCount["fal"]}");
+            Fi(Seti(F5), 0, CLO);
+            Malkrz($"laf@{this.labelCount["fal"]}", XX);
+        }
+
+        public void Laf()
+        {
+            if (!this.jumpLabelStack.Peek().StartsWith("fal"))
             {
-                case ".":
-                    Fnx(UbplCommon.UbplConstant.TVARLON_KNLOAN_ADDRESS, Seti(F5));
-                    Ata(4, F5);
-                    break;
-                case "krz":
-                case "kRz":
-                    Nta(4, F5);
-                    Krz(Seti(F5 + 4), Seti(F5));
-                    break;
-                case "ach":
-                    Mte(Seti(F5), Seti(F5 + 4));
-                    Anf(Seti(F5), Seti(F5 + 4));
-                    break;
-                case "roft":
-                    Krz(Seti(F5 + 8), F0);
-                    Mte(Seti(F5), Seti(F5 + 4));
-                    Anf(Seti(F5 + 8), Seti(F5 + 4));
-                    Krz(F0, Seti(F5));
-                    break;
-                case "ycax":
-                    Ata(4, F5);
-                    break;
-                case "pielyn":
-                    Krz(F1, F5);
-                    break;
-                case "fal":
-                    this.labelCount["fal"] += 1;
-
-                    this.jumpLabelStack.Push($"laf@{this.labelCount["fal"]}");
-                    this.jumpLabelStack.Push($"fal@{this.labelCount["fal"]}");
-
-                    Nll($"fal@{this.labelCount["fal"]}");
-                    Fi(Seti(F5), 0, CLO);
-                    Malkrz($"laf@{this.labelCount["fal"]}", XX);
-                    break;
-                case "laf":
-                    if (!this.jumpLabelStack.Peek().StartsWith("fal"))
-                    {
-                        throw new ApplicationException("'laf' cannot be here");
-                    }
-                    Krz(this.jumpLabelStack.Pop(), XX);
-                    Nll(this.jumpLabelStack.Pop());
-                    break;
-                case "fi":
-                    this.labelCount["fi"] += 1;
-
-                    this.jumpLabelStack.Push($"if@{this.labelCount["fi"]}");
-                    this.jumpLabelStack.Push($"ol@{this.labelCount["fi"]}");
-
-                    Fi(Seti(F5), 0, CLO);
-                    Malkrz($"ol@{this.labelCount["fi"]}", XX);
-                    break;
-                case "ol":
-                    if (!this.jumpLabelStack.Peek().StartsWith("ol"))
-                    {
-                        throw new ApplicationException("'ol' cannot be here");
-                    }
-
-                    label = this.jumpLabelStack.Pop();
-
-                    Krz(this.jumpLabelStack.Peek(), XX);
-                    Nll(label);
-                    Krz(F0, F0);
-                    break;
-                case "if":
-                    label = this.jumpLabelStack.Pop();
-
-                    if (!(label.StartsWith("ol") || label.StartsWith("if")))
-                    {
-                        throw new ApplicationException("'if' cannot be here");
-                    }
-
-                    if (label.StartsWith("ol"))
-                    {
-                        this.jumpLabelStack.Pop();
-                    }
-
-                    Nll(label);
-                    break;
-                case "cecio":
-                    this.labelCount["cecio"] += 1;
-
-                    this.jumpLabelStack.Push($"oicec@{this.labelCount["cecio"]}");
-                    this.jumpLabelStack.Push($"cecio@{this.labelCount["cecio"]}");
-
-                    Nll($"cecio@{this.labelCount["cecio"]}");
-                    Fi(Seti(F5), Seti(F5 + 4), LLO);
-                    Malkrz($"oicec@{this.labelCount["cecio"]}", XX);
-                    break;
-                case "oicec":
-                    Ata(1, Seti(F5));
-                    Krz(this.jumpLabelStack.Pop(), XX);
-                    Nll(this.jumpLabelStack.Pop());
-                    Ata(8, F5);
-                    break;
-                case "kinfit":
-                    Krz(F1, F0);
-                    Nta(F5, F0);
-                    Dtosna(2, F0);
-                    Nta(4, F5);
-                    Krz(F0, Seti(F5));
-                    break;
-                default:
-                    throw new ApplicationException($"Invalid operation: {operation}");
+                throw new ApplicationException("'laf' cannot be here");
             }
+            Krz(this.jumpLabelStack.Pop(), XX);
+            Nll(this.jumpLabelStack.Pop());
+        }
+
+        public void Fi()
+        {
+            this.labelCount["fi"] += 1;
+
+            this.jumpLabelStack.Push($"if@{this.labelCount["fi"]}");
+            this.jumpLabelStack.Push($"ol@{this.labelCount["fi"]}");
+
+            Fi(Seti(F5), 0, CLO);
+            Malkrz($"ol@{this.labelCount["fi"]}", XX);
+        }
+
+        public void Ol()
+        {
+            if (!this.jumpLabelStack.Peek().StartsWith("ol"))
+            {
+                throw new ApplicationException("'ol' cannot be here");
+            }
+
+            string label = this.jumpLabelStack.Pop();
+
+            Krz(this.jumpLabelStack.Peek(), XX);
+            Nll(label);
+            Krz(F0, F0);
+        }
+
+        public void If()
+        {
+            string label = this.jumpLabelStack.Pop();
+
+            if (!(label.StartsWith("ol") || label.StartsWith("if")))
+            {
+                throw new ApplicationException("'if' cannot be here");
+            }
+
+            if (label.StartsWith("ol"))
+            {
+                this.jumpLabelStack.Pop();
+            }
+
+            Nll(label);
+        }
+
+        public void Cecio()
+        {
+            this.labelCount["cecio"] += 1;
+
+            this.jumpLabelStack.Push($"oicec@{this.labelCount["cecio"]}");
+            this.jumpLabelStack.Push($"cecio@{this.labelCount["cecio"]}");
+
+            Nll($"cecio@{this.labelCount["cecio"]}");
+            Fi(Seti(F5), Seti(F5 + 4), LLO);
+            Malkrz($"oicec@{this.labelCount["cecio"]}", XX);
+        }
+
+        public void Oicec()
+        {
+            Ata(1, Seti(F5));
+            Krz(this.jumpLabelStack.Pop(), XX);
+            Nll(this.jumpLabelStack.Pop());
+            Ata(8, F5);
+        }
+
+        public void Kinfit()
+        {
+            Krz(F1, F0);
+            Nta(F5, F0);
+            Dtosna(2, F0);
+            Nta(4, F5);
+            Krz(F0, Seti(F5));
         }
     }
 }
