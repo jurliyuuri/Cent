@@ -322,7 +322,7 @@ namespace Cent.Core
             string laf = "$laf" + count;
             this.jumpLabelStack.Push(fal);
 
-            this.writer.Append(oldIndent).AppendFormat("block {0} loop {1}", laf, fal)
+            this.writer.Append(oldIndent).AppendFormat("block {0} loop {1}", laf, fal).AppendLine()
                 .Append(this.indent).AppendLine("get_local $count i32.load i32.eqz")
                 .Append(this.indent).Append("br_if ").AppendLine(laf);
         }
@@ -379,7 +379,7 @@ namespace Cent.Core
             this.writer.Append(oldIndent).AppendFormat("block {0} loop {1}", oicec, cecio).AppendLine()
                 .Append(this.indent).AppendLine("get_local $count i32.const 4 i32.sub i32.load get_local $count i32.load i32.lt_s")
                 .Append(this.indent).AppendLine("if get_local $count i32.const 8 i32.sub set_local $count")
-                .Append(this.indent).AppendLine("    br ").AppendLine(oicec)
+                .Append(this.indent).AppendLine("  br ").AppendLine(oicec)
                 .Append(this.indent).AppendLine("end");
         }
 

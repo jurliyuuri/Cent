@@ -23,7 +23,6 @@ namespace Cent.Core
                 ["cecio"] = 0,
                 ["fal"] = 0,
                 ["fi"] = 0,
-                ["leles"] = 0,
             };
             this.writer = new StringBuilder();
         }
@@ -49,7 +48,8 @@ namespace Cent.Core
                 .AppendLine("section .text")
                 .AppendLine("main:")
                 .Append(indent).AppendLine("push rbp")
-                .Append(indent).AppendLine("mov rbp, rsp");
+                .Append(indent).AppendLine("mov rbp, rsp")
+                .Append(indent).AppendLine("mov rbx, 0");
         }
 
         protected override void PostProcess(string outFileName)
@@ -188,8 +188,6 @@ namespace Cent.Core
 
         protected override void Xtlo()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("setle al")
@@ -201,8 +199,6 @@ namespace Cent.Core
 
         protected override void Xylo()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("setl al")
@@ -214,8 +210,6 @@ namespace Cent.Core
 
         protected override void Clo()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("sete al")
@@ -227,8 +221,6 @@ namespace Cent.Core
 
         protected override void Niv()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("setne al")
@@ -240,8 +232,6 @@ namespace Cent.Core
 
         protected override void Llo()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("setg al")
@@ -253,8 +243,6 @@ namespace Cent.Core
 
         protected override void Xolo()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("setge al")
@@ -266,8 +254,6 @@ namespace Cent.Core
 
         protected override void Xtlonys()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("setbe al")
@@ -279,8 +265,6 @@ namespace Cent.Core
 
         protected override void Xylonys()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("setb al")
@@ -292,8 +276,6 @@ namespace Cent.Core
 
         protected override void Llonys()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("seta al")
@@ -305,8 +287,6 @@ namespace Cent.Core
 
         protected override void Xolonys()
         {
-            int count = this.labelCount["leles"]++;
-
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
                 .Append(indent).AppendLine("cmp eax, [rsp]")
                 .Append(indent).AppendLine("setae al")
