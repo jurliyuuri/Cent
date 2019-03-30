@@ -83,44 +83,59 @@ namespace Cent.Core
             this.writer.AppendLine("dal 0 f5@ ata 1 f5@");
         }
 
+        protected override void Ata1()
+        {
+            this.writer.AppendLine("ata 1 f5@");
+        }
+
+        protected override void Nta1()
+        {
+            this.writer.AppendLine("nta 1 f5@");
+        }
+
         protected override void Ata()
         {
-            this.writer.AppendLine("ata f5+4@ f5@ ata 4 f5");
+            BiOperator("ata");
         }
 
         protected override void Nta()
         {
-            this.writer.AppendLine("nta f5+4@ f5@ ata 4 f5");
+            BiOperator("nta");
         }
 
         protected override void Ada()
         {
-            this.writer.AppendLine("ada f5+4@ f5@ ata 4 f5");
+            BiOperator("ada");
         }
 
         protected override void Ekc()
         {
-            this.writer.AppendLine("akc f5+4@ f5@ ata 4 f5");
+            BiOperator("ekc");
         }
 
         protected override void Dto()
         {
-            this.writer.AppendLine("dto f5+4@ f5@ ata 4 f5");
+            BiOperator("dto");
         }
 
         protected override void Dro()
         {
-            this.writer.AppendLine("dro f5+4@ f5@ ata 4 f5");
+            BiOperator("dro");
         }
 
         protected override void Dtosna()
         {
-            this.writer.AppendLine("dtosna f5+4@ f5@ ata 4 f5");
+            BiOperator("dtosna");
         }
 
         protected override void Dal()
         {
-            this.writer.AppendLine("dal f5+4@ f5@ ata 4 f5");
+            BiOperator("dal");
+        }
+
+        private void BiOperator(string op)
+        {
+            this.writer.Append(op).AppendLine(" f5@ f5+4@ ata 4 f5");
         }
 
         protected override void Lat()
@@ -188,16 +203,16 @@ namespace Cent.Core
             int count = this.labelCount["leles"];
             this.labelCount["leles"] = ++count;
 
-            this.writer.Append("fi f5@ f5+4@ ").Append(op)
-                .AppendFormat(" malkrz --leles-niv--{0}", count).AppendLine(" xx")
-                .AppendFormat("krz 0 f5+4@ krz --leles-situv--{0}", count).AppendLine(" xx")
-                .AppendFormat("nll --leles-niv--{0}", count).AppendLine(" krz 1 f5+4@")
-                .AppendFormat("nll --leles-situv--{0}", count).AppendLine(" ata 4 f5");
+            this.writer.AppendFormat("fi f5@ f5+4@ {0}", op)
+                .AppendFormat(" malkrz --leles-niv--{0} xx", count).AppendLine()
+                .AppendFormat("krz 0 f5+4@ krz --leles-situv--{0} xx", count).AppendLine()
+                .AppendFormat("nll --leles-niv--{0} krz 1 f5+4@", count).AppendLine()
+                .AppendFormat("nll --leles-situv--{0} ata 4 f5", count).AppendLine();
         }
 
         protected override void Tikl()
         {
-            this.writer.AppendLine("inj 3126834864 xx f5@ ata 4 f5");
+            this.writer.AppendLine("nta 4 f5 inj 3126834864 xx f5@ ata 8 f5");
         }
 
         protected override void Krz()
@@ -235,7 +250,7 @@ namespace Cent.Core
             this.jumpLabelStack.Push(lafLabel);
             this.jumpLabelStack.Push(falLabel);
 
-            this.writer.AppendFormat("nll {0} fi f5@ 0 clo malkrz {1}", falLabel, lafLabel).AppendLine(" xx");
+            this.writer.AppendFormat("nll {0} fi f5@ 0 clo malkrz {1} xx", falLabel, lafLabel).AppendLine();
         }
 
         protected override void Laf()
@@ -245,8 +260,8 @@ namespace Cent.Core
                 throw new ApplicationException("'laf' cannot be here");
             }
 
-            this.writer.AppendFormat("krz {0} xx nll ", this.jumpLabelStack.Pop())
-                .AppendLine(this.jumpLabelStack.Pop());
+            this.writer.AppendFormat("krz {0} xx nll {1}", this.jumpLabelStack.Pop(), this.jumpLabelStack.Pop())
+                .AppendLine();
         }
 
         protected override void Fi()
@@ -258,7 +273,7 @@ namespace Cent.Core
             this.jumpLabelStack.Push(ifLabel);
             this.jumpLabelStack.Push(olLabel);
 
-            this.writer.AppendFormat("fi f5@ 0 clo malkrz {0}", olLabel).AppendLine(" xx");
+            this.writer.AppendFormat("fi f5@ 0 clo malkrz {0} xx", olLabel).AppendLine();
         }
 
         protected override void Ol()
@@ -270,7 +285,7 @@ namespace Cent.Core
 
             string label = this.jumpLabelStack.Pop();
 
-            this.writer.AppendFormat("krz {0} xx nll {1}", this.jumpLabelStack.Pop(), label).AppendLine();
+            this.writer.AppendFormat("krz {0} xx nll {1}", this.jumpLabelStack.Peek(), label).AppendLine();
         }
 
         protected override void If()
@@ -287,7 +302,7 @@ namespace Cent.Core
                 this.jumpLabelStack.Pop();
             }
 
-            this.writer.Append("nll ").AppendLine(label);
+            this.writer.AppendFormat("nll {0}", label).AppendLine();
         }
 
         protected override void Cecio()
@@ -299,8 +314,8 @@ namespace Cent.Core
             this.jumpLabelStack.Push(oicecLabel);
             this.jumpLabelStack.Push(cecioLabel);
 
-            this.writer.AppendFormat("nll {0} fi f5@ f5+4@ llo malkrz {1}", cecioLabel, oicecLabel)
-                .AppendLine(" xx");
+            this.writer.AppendFormat("nll {0} fi f5@ f5+4@ llo malkrz {1} xx", cecioLabel, oicecLabel)
+                .AppendLine();
         }
 
         protected override void Oicec()
@@ -310,8 +325,8 @@ namespace Cent.Core
                 throw new ApplicationException("'oicec' cannot be here");
             }
 
-            this.writer.AppendFormat("ata 1 f5@ krz {0} xx nll {1}", this.jumpLabelStack.Pop(), this.jumpLabelStack.Pop())
-                .AppendLine(" ata 8 f5");
+            this.writer.AppendFormat("ata 1 f5@ krz {0} xx nll {1} ata 8 f5",
+                this.jumpLabelStack.Pop(), this.jumpLabelStack.Pop()).AppendLine();
         }
 
         protected override void Kinfit()

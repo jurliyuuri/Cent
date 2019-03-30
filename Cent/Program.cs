@@ -9,21 +9,25 @@ namespace Cent
 {
     class Program
     {
+        private const string OPTIMIZE = "--optimize";
+        private const string OUT_FILE = "-o";
+
         static void Main(string[] args)
         {
             try
             {
-
                 if (args.Length > 0)
                 {
-                    var outFileOptionIndex = Array.IndexOf(args, "-o");
+                    var isOptimized = Array.IndexOf(args, OPTIMIZE) != -1;
+                    var outFileOptionIndex = Array.IndexOf(args, OUT_FILE);
                     CentTranscompiler cent;
 
                     if (outFileOptionIndex == -1)
                     {
-                        cent = GetTranscompiler(args.ToList());
-                        if (Array.IndexOf(args, "-f") != -1 || Array.IndexOf(args, "--2003f") != -1
-                            || Array.IndexOf(args, "--ubpl") != -1)
+                        cent = GetTranscompiler(args.Where(x => x != OPTIMIZE).ToList());
+                        cent.IsOptimized = isOptimized;
+
+                        if (Array.IndexOf(args, "--ubpl") != -1)
                         {
                             cent.Output("a.out");
                         }
@@ -47,21 +51,23 @@ namespace Cent
                     else if (outFileOptionIndex == args.Length - 1)
                     {
                         Console.WriteLine("No set output file name");
-                        Console.WriteLine("cent.exe (-l|-f|--2003f|--ubpl|--wat|--lua64|--win64nasm) [inFileNames] (-o [outFileName])");
+                        DisplayUsage();
                         Environment.Exit(1);
                     }
                     else
                     {
                         var outFileIndex = outFileOptionIndex + 1;
-                        var inFiles = args.Where((x, i) => i != outFileOptionIndex && i != outFileIndex).ToList();
+                        var inFiles = args.Where((x, i) => i != outFileOptionIndex && i != outFileIndex && x != OPTIMIZE).ToList();
 
                         cent = GetTranscompiler(inFiles.ToList());
-                        cent.Output(args[outFileIndex]);
+                        cent.IsOptimized = isOptimized;
+
+                        cent.Output(args.ElementAt(outFileIndex));
                     }
                 }
                 else
                 {
-                    Console.WriteLine("cent.exe (-l|-f|--2003f|--ubpl|--wat|--lua64|--win64nasm) [inFileNames] (-o [outFileName])");
+                    DisplayUsage();
                 }
             }
             catch (Exception ex)
@@ -75,13 +81,9 @@ namespace Cent
 
         static CentTranscompiler GetTranscompiler(List<string> inFileNames)
         {
-            if (inFileNames.Any(x => x == "-f" || x == "--2003f"))
+            if (inFileNames.Any(x => x == "--ubpl"))
             {
-                return new CentTo2003fBinary(inFileNames.Where(x => x != "-f" && x != "--2003f").ToList());
-            }
-            else if (inFileNames.Any(x => x == "--ubpl"))
-            {
-                return new CentToUbplBinary(inFileNames.Where(x => x != "-ubpl").ToList());
+                return new CentToUbplBinary(inFileNames.Where(x => x != "--ubpl").ToList());
             }
             else if (inFileNames.Any(x => x == "--wat"))
             {
@@ -101,6 +103,11 @@ namespace Cent
             }
 
             throw new ApplicationException();
+        }
+
+        static void DisplayUsage()
+        {
+            Console.WriteLine("cent.exe (-l|--ubpl|--wat|--lua64|--win64nasm) [inFileNames] (-o [outFileName]) (--optimize)");
         }
     }
 }

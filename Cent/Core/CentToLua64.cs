@@ -83,6 +83,16 @@ namespace Cent.Core
             this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(-stack[#stack])");
         }
 
+        protected override void Ata1()
+        {
+            this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(stack[#stack] + 1)");
+        }
+
+        protected override void Nta1()
+        {
+            this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(stack[#stack] - 1)");
+        }
+
         protected override void Ata()
         {
             this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")

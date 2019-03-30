@@ -97,6 +97,20 @@ namespace Cent.Core
                 .Append(indent).AppendLine("mov [rsp], eax");
         }
 
+        protected override void Ata1()
+        {
+            this.writer.Append(indent).AppendLine("mov eax, [rsp]")
+                .Append(indent).AppendLine("inc eax")
+                .Append(indent).AppendLine("mov [rsp], eax");
+        }
+
+        protected override void Nta1()
+        {
+            this.writer.Append(indent).AppendLine("mov eax, [rsp]")
+                .Append(indent).AppendLine("dec eax")
+                .Append(indent).AppendLine("mov [rsp], eax");
+        }
+
         protected override void Ata()
         {
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")

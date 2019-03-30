@@ -15,7 +15,7 @@ namespace Cent.Core
 
         protected static readonly IReadOnlyDictionary<string, int> compareMap;
 
-        static CentTranscompiler ()
+        static CentTranscompiler()
         {
             operatorMap = new System.Collections.ObjectModel.ReadOnlyDictionary<string, int>(
                 new Dictionary<string, int>
@@ -38,8 +38,6 @@ namespace Cent.Core
                     ["fi"] = 1, ["ol"] = 0, ["if"] = 0,
                     ["cecio"] = 2, ["oicec"] = 0,
                     ["kinfit"] = 0,
-                    ["krzq"] = 2, ["kRzq"] = 2, ["achq"] = 2,
-                    ["roftq"] = 1,
                 });
 
             compareMap = new System.Collections.ObjectModel.ReadOnlyDictionary<string, int>(
@@ -54,6 +52,7 @@ namespace Cent.Core
         }
 
         public IReadOnlyList<string> InFileNames { get; }
+        public bool IsOptimized { get; set; }
 
         protected List<string> tokens;
         private readonly List<List<string>> subroutines;
@@ -90,6 +89,25 @@ namespace Cent.Core
 
             CheckCentProgramme();
             ListingTokens();
+            if(IsOptimized)
+            {
+                List<string> tokens = Optimize(this.tokens);
+                this.tokens.Clear();
+                this.tokens.AddRange(tokens);
+
+                List<List<string>> subroutines = new List<List<string>>();
+                foreach (var subroutine in this.subroutines)
+                {
+                    if (subroutine.First() != "xok")
+                    {
+                        subroutines.Add(Optimize(subroutine));
+                    }
+                }
+                this.subroutines.Clear();
+                this.subroutines.AddRange(subroutines);
+
+                ListingTokens();
+            }
             Write(outFileName);
         }
 
@@ -332,6 +350,113 @@ namespace Cent.Core
             }
         }
 
+        private List<string> Optimize(List<string> tokenList)
+        {
+            List<string> tokens = new List<string>();
+            string prev = "";
+
+            foreach (var token in tokenList)
+            {
+                if ((token == "if" && prev == "fi") ||
+                    (token == "ach" && prev == "ach") ||
+                    (token == "nac" && prev == "nac") ||
+                    (token == "sna" && prev == "sna"))
+                {
+                    tokens.RemoveAt(tokens.Count - 1);
+                    prev = tokens.LastOrDefault() ?? "";
+                }
+                else if (token == "laf" && prev == "fal")
+                {
+                    tokens.RemoveAt(tokens.Count - 1);
+                    prev = tokens.LastOrDefault() ?? "";
+                }
+                else if (token == "roft" && prev == "roft")
+                {
+                    string prev2 = tokens.Count < 2 ? "" : tokens[tokens.Count - 2];
+
+                    if (prev2 == "roft")
+                    {
+                        tokens.RemoveRange(tokens.Count - 2, 2);
+                        prev = tokens.LastOrDefault() ?? "";
+                    }
+                    else
+                    {
+                        tokens.Add(token);
+                        prev = token;
+                    }
+                }
+                else if (token == "kinfit" && (prev == "" || prev == "pielyn"))
+                {
+                    tokens.Add("0");
+                    prev = "0";
+                }
+                else if (token == "sna" && prev == "nac")
+                {
+                    if (tokens[tokens.Count - 2] == "<>nta1")
+                    {
+                        tokens.RemoveRange(tokens.Count - 2, 2);
+                        prev = tokens.LastOrDefault() ?? "";
+                    }
+                    else
+                    {
+                        tokens[tokens.Count - 1] = "<>ata1";
+                        prev = "<>ata1";
+                    }
+                }
+                else if (token == "nac" && prev == "sna")
+                {
+                    if (tokens[tokens.Count - 2] == "<>ata1")
+                    {
+                        tokens.RemoveRange(tokens.Count - 2, 2);
+                        prev = tokens.LastOrDefault() ?? "";
+                    }
+                    else
+                    {
+                        tokens[tokens.Count - 1] = "<>nta1";
+                        prev = "<>nta1";
+                    }
+                }
+                else if (prev.All(char.IsDigit))
+                {
+                    switch (token)
+                    {
+                        case "krz":
+                            tokens.Add(prev);
+                            break;
+                        case "pielyn":
+                            {
+                                int index = tokens.FindLastIndex(x => !x.All(char.IsDigit));
+                                int count = tokens.Count - index - 1;
+
+                                if (count > 0)
+                                {
+                                    tokens.RemoveRange(index + 1, count);
+                                }
+                            }
+                            tokens.Add(token);
+                            prev = token;
+                            break;
+                        case "ycax":
+                            tokens.RemoveAt(tokens.Count - 1);
+                            prev = token;
+                            break;
+                        default:
+                            tokens.Add(token);
+                            prev = token;
+                            break;
+                    }
+                }
+                else
+                {
+                    tokens.Add(token);
+                    prev = token;
+                }
+            }
+
+            return tokens;
+        }
+        
+
         /// <summary>
         /// 変換先出力
         /// </summary>
@@ -394,6 +519,12 @@ namespace Cent.Core
                         break;
                     case "sna":
                         Sna();
+                        break;
+                    case "<>ata1":
+                        Ata1();
+                        break;
+                    case "<>nta1":
+                        Nta1();
                         break;
                     case "ata":
                         Ata();
@@ -547,6 +678,18 @@ namespace Cent.Core
         protected abstract void Oicec();
         protected abstract void Kinfit();
         protected abstract void Tikl();
+
+        protected virtual void Ata1()
+        {
+            Nac();
+            Sna();
+        }
+
+        protected virtual void Nta1()
+        {
+            Sna();
+            Nac();
+        }
         
         /// <summary>
         /// 字句解析・コードチェック後のコード出力(デバッグ用)

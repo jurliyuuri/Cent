@@ -32,9 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LkCommon">
-      <HintPath>..\libraries\LkCommon.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,7 +47,6 @@
   <ItemGroup>
     <Compile Include="Core\CentToWin64Nasm.cs" />
     <Compile Include="Core\CentToUbplBinary.cs" />
-    <Compile Include="Core\CentTo2003fBinary.cs" />
     <Compile Include="Core\CentTo2003lk.cs" />
     <Compile Include="Core\CentToLua64.cs" />
     <Compile Include="Core\CentToWat.cs" />
