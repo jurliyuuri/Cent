@@ -370,19 +370,22 @@ namespace Cent.Core
                     tokens.RemoveAt(tokens.Count - 1);
                     prev = tokens.LastOrDefault() ?? "";
                 }
-                else if (token == "roft" && prev == "roft")
+                else if (token == "roft")
                 {
-                    string prev2 = tokens.Count < 2 ? "" : tokens[tokens.Count - 2];
-
-                    if (prev2 == "roft")
+                    switch(prev)
                     {
-                        tokens.RemoveRange(tokens.Count - 2, 2);
-                        prev = tokens.LastOrDefault() ?? "";
-                    }
-                    else
-                    {
-                        tokens.Add(token);
-                        prev = token;
+                        case "roft":
+                            tokens[tokens.Count - 1] = "<>roft-nia";
+                            prev = "<>roft-nia";
+                            break;
+                        case "<>roft-nia":
+                            tokens.RemoveAt(tokens.Count - 1);
+                            prev = tokens.LastOrDefault() ?? "";
+                            break;
+                        default:
+                            tokens.Add(token);
+                            prev = token;
+                            break;
                     }
                 }
                 else if (token == "kinfit" && (prev == "" || prev == "pielyn"))
@@ -520,12 +523,6 @@ namespace Cent.Core
                     case "sna":
                         Sna();
                         break;
-                    case "<>ata1":
-                        Ata1();
-                        break;
-                    case "<>nta1":
-                        Nta1();
-                        break;
                     case "ata":
                         Ata();
                         break;
@@ -630,6 +627,15 @@ namespace Cent.Core
                     case "tikl":
                         Tikl();
                         break;
+                    case "<>ata1":
+                        Ata1();
+                        break;
+                    case "<>nta1":
+                        Nta1();
+                        break;
+                    case "<>roft-nia":
+                        RoftNia();
+                        break;
                     case "lykl":
                     default:
                         throw new ApplicationException($"Unknown word: '{token}'");
@@ -689,6 +695,12 @@ namespace Cent.Core
         {
             Sna();
             Nac();
+        }
+
+        protected virtual void RoftNia()
+        {
+            Roft();
+            Roft();
         }
         
         /// <summary>

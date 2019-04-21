@@ -97,20 +97,6 @@ namespace Cent.Core
                 .Append(indent).AppendLine("mov [rsp], eax");
         }
 
-        protected override void Ata1()
-        {
-            this.writer.Append(indent).AppendLine("mov eax, [rsp]")
-                .Append(indent).AppendLine("inc eax")
-                .Append(indent).AppendLine("mov [rsp], eax");
-        }
-
-        protected override void Nta1()
-        {
-            this.writer.Append(indent).AppendLine("mov eax, [rsp]")
-                .Append(indent).AppendLine("dec eax")
-                .Append(indent).AppendLine("mov [rsp], eax");
-        }
-
         protected override void Ata()
         {
             this.writer.Append(indent).AppendLine("mov eax, [rsp+16]")
@@ -460,6 +446,30 @@ namespace Cent.Core
                 .Append(indent).AppendLine("sub rsp, 8")
                 .Append(indent).AppendLine("push rax")
                 .Append(indent).AppendLine("add rbx, 1");
+        }
+
+        protected override void Ata1()
+        {
+            this.writer.Append(indent).AppendLine("mov eax, [rsp]")
+                .Append(indent).AppendLine("inc eax")
+                .Append(indent).AppendLine("mov [rsp], eax");
+        }
+
+        protected override void Nta1()
+        {
+            this.writer.Append(indent).AppendLine("mov eax, [rsp]")
+                .Append(indent).AppendLine("dec eax")
+                .Append(indent).AppendLine("mov [rsp], eax");
+        }
+
+        protected override void RoftNia()
+        {
+            this.writer.Append(indent).AppendLine("mov ecx, [rsp]")
+                .Append(indent).AppendLine("mov edx, [rsp+16]")
+                .Append(indent).AppendLine("mov eax, [rsp+32]")
+                .Append(indent).AppendLine("mov [rsp+16], eax")
+                .Append(indent).AppendLine("mov [rsp+32], ecx")
+                .Append(indent).AppendLine("mov [rsp], edx");
         }
     }
 }

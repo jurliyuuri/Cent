@@ -83,16 +83,6 @@ namespace Cent.Core
             this.writer.AppendLine("dal 0 f5@ ata 1 f5@");
         }
 
-        protected override void Ata1()
-        {
-            this.writer.AppendLine("ata 1 f5@");
-        }
-
-        protected override void Nta1()
-        {
-            this.writer.AppendLine("nta 1 f5@");
-        }
-
         protected override void Ata()
         {
             BiOperator("ata");
@@ -332,6 +322,21 @@ namespace Cent.Core
         protected override void Kinfit()
         {
             this.writer.AppendLine("krz f1 f0 nta f5 f0 dtosna 2 f0 nta 4 f5 krz f0 f5@");
+        }
+
+        protected override void Ata1()
+        {
+            this.writer.AppendLine("ata 1 f5@");
+        }
+
+        protected override void Nta1()
+        {
+            this.writer.AppendLine("nta 1 f5@");
+        }
+
+        protected override void RoftNia()
+        {
+            this.writer.AppendLine("krz f5@ f0 inj f5+8@ f5+4@ f5@ krz f0 f5+8@");
         }
     }
 }

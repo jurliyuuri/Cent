@@ -49,16 +49,6 @@ namespace Cent.Core
             this.creator.Sna();
         }
 
-        protected override void Ata1()
-        {
-            this.creator.Ata1();
-        }
-
-        protected override void Nta1()
-        {
-            this.creator.Nta1();
-        }
-
         protected override void Ata()
         {
             this.creator.Ata();
@@ -229,6 +219,21 @@ namespace Cent.Core
         {
             this.creator.Kinfit();
         }
+
+        protected override void Ata1()
+        {
+            this.creator.Ata1();
+        }
+
+        protected override void Nta1()
+        {
+            this.creator.Nta1();
+        }
+
+        protected override void RoftNia()
+        {
+            this.creator.RoftNia();
+        }
     }
 
     class BinaryUbplCreator : CodeGenerator
@@ -310,16 +315,6 @@ namespace Cent.Core
         {
             Dal(0, Seti(F5));
             Ata(1, Seti(F5));
-        }
-
-        public void Ata1()
-        {
-            Ata(1, Seti(F5));
-        }
-
-        public void Nta1()
-        {
-            Nta(1, Seti(F5));
         }
 
         public void Ata()
@@ -616,6 +611,24 @@ namespace Cent.Core
             Dtosna(2, F0);
             Nta(4, F5);
             Krz(F0, Seti(F5));
+        }
+
+        public void Ata1()
+        {
+            Ata(1, Seti(F5));
+        }
+
+        public void Nta1()
+        {
+            Nta(1, Seti(F5));
+        }
+
+        public void RoftNia()
+        {
+            Krz(Seti(F5), F0);
+            Mte(Seti(F5 + 4), Seti(F5 + 8));
+            Anf(Seti(F5), Seti(F5 + 4));
+            Krz(F0, Seti(F5 + 8));
         }
     }
 }

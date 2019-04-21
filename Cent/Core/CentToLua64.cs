@@ -83,16 +83,6 @@ namespace Cent.Core
             this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(-stack[#stack])");
         }
 
-        protected override void Ata1()
-        {
-            this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(stack[#stack] + 1)");
-        }
-
-        protected override void Nta1()
-        {
-            this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(stack[#stack] - 1)");
-        }
-
         protected override void Ata()
         {
             this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
@@ -344,6 +334,23 @@ namespace Cent.Core
         protected override void Kinfit()
         {
             this.writer.Append(this.indent).AppendLine("table.insert(stack, #stack)");
+        }
+
+        protected override void Ata1()
+        {
+            this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(stack[#stack] + 1)");
+        }
+
+        protected override void Nta1()
+        {
+            this.writer.Append(this.indent).AppendLine("stack[#stack] = to32(stack[#stack] - 1)");
+        }
+
+        protected override void RoftNia()
+        {
+            this.writer.Append(this.indent)
+                .Append("stack[#stack - 2], stack[#stack - 1], stack[#stack]")
+                .AppendLine(" = stack[#stack], stack[#stack - 2], stack[#stack - 1]");
         }
     }
 }

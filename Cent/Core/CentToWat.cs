@@ -107,18 +107,6 @@ namespace Cent.Core
                 .Append(this.indent).AppendLine("i32.const -1 i32.xor i32.const 1 i32.add i32.store");
         }
 
-        protected override void Ata1()
-        {
-            this.writer.Append(this.indent).Append("get_local $count get_local $count i32.load")
-                .Append(this.indent).AppendLine("i32.const 1 i32.add i32.store");
-        }
-
-        protected override void Nta1()
-        {
-            this.writer.Append(this.indent).Append("get_local $count get_local $count i32.load")
-                .Append(this.indent).AppendLine("i32.const 1 i32.sub i32.store");
-        }
-
         protected override void Ata()
         {
             this.writer.Append(this.indent).AppendLine("get_local $count i32.const 4 i32.sub tee_local $count")
@@ -417,6 +405,29 @@ namespace Cent.Core
         {
             this.writer.Append(this.indent).AppendLine("get_local $count i32.const 4 i32.add tee_local $count")
                 .Append(this.indent).AppendLine("get_local $count i32.const 4 i32.div_s i32.store");
+        }
+
+        protected override void Ata1()
+        {
+            this.writer.Append(this.indent).Append("get_local $count get_local $count i32.load")
+                .Append(this.indent).AppendLine("i32.const 1 i32.add i32.store");
+        }
+
+        protected override void Nta1()
+        {
+            this.writer.Append(this.indent).Append("get_local $count get_local $count i32.load")
+                .Append(this.indent).AppendLine("i32.const 1 i32.sub i32.store");
+        }
+
+        protected override void RoftNia()
+        {
+            this.writer.Append(this.indent).AppendLine("get_local $count")
+                .Append(this.indent).AppendLine("get_local $count i32.const 4 i32.sub i32.load")
+                .Append(this.indent).AppendLine("get_local $count i32.const 8 i32.sub")
+                .Append(this.indent).AppendLine("get_local $count i32.load")
+                .Append(this.indent).AppendLine("get_local $count i32.const 4 i32.sub")
+                .Append(this.indent).AppendLine("get_local $count i32.const 8 i32.sub i32.load")
+                .Append(this.indent).AppendLine("i32.store i32.store i32.store");
         }
     }
 }
