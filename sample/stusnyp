@@ -3,32 +3,45 @@ kue tostesn
 
 'c'i
 nll jyvied
-nta f5 4
+nta f5 12
+krz f5+8@ f3
+krz f5+4@ f2
 krz f5@ f1
-krz f0 f5+12@
-krz f1 f5+8@
+krz f2 f5
+krz f0 f5+20@
+krz f1 f5+16@
 nta f0 f1
 krz f3 f0
 dtosna f3 31
 ada f0 f3
 ata f0 f1
+krz f5 f2
 krz f1 f5@
-ata f5 4
+krz f2 f5+4@
+krz f3 f5+8@
+ata f5 12
 krz xx f5@
 
 'c'i
 nll tostesn
-nta f5 4
+nta f5 12
+krz f5+8@ f3
+krz f5+4@ f2
 krz f5@ f1
-krz f0 f5+12@
-krz f1 f5+8@
+krz f2 f5
+krz f0 f5+20@
+krz f1 f5+16@
 nta f0 f1
 krz f3 f0
 dtosna f3 31
 nac f3
 ada f0 f3
 ata f0 f1
+krz f5 f2
 krz f1 f5@
-ata f5 4
+krz f2 f5+4@
+krz f3 f5+8@
+ata f5 12
 krz xx f5@
+
 

@@ -60,8 +60,9 @@ namespace Cent.Core
         protected readonly List<string> subroutineNames;
         protected readonly Dictionary<string, uint> funcNames;
         protected readonly Stack<string> callSubroutines;
+        protected bool isTopMain;
 
-        public CentTranscompiler(IList<string> inFileNames)
+        protected CentTranscompiler(IList<string> inFileNames, bool isTopMain)
         {
             this.InFileNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(inFileNames.ToList());
             
@@ -71,11 +72,16 @@ namespace Cent.Core
             this.subroutineNames = new List<string>();
             this.funcNames = new Dictionary<string, uint>();
             this.callSubroutines = new Stack<string>();
+            this.isTopMain = isTopMain;
         }
 
-        public CentTranscompiler(string[] inFiles) : this(inFiles.ToList()) { }
+        protected CentTranscompiler(IList<string> inFileNames) : this(inFileNames, true) { }
 
-        public void Output(string outFileName)
+        protected CentTranscompiler(string[] inFiles) : this(inFiles.ToList(), true) { }
+
+        protected CentTranscompiler(string[] inFiles, bool isTopMain) : this(inFiles.ToList(), isTopMain) { }
+
+        protected void Output(string outFileName)
         {
             if(!this.InFileNames.All(x => x.EndsWith(".cent")))
             {
@@ -479,10 +485,26 @@ namespace Cent.Core
             }
             
             PreProcess(outFileName);
-            foreach (var token in this.tokens)
+
+            if(isTopMain)
             {
-                WriteTokens(token);
+                DefineMainroutine();
+
+                foreach (var subroutine in this.subroutines.Where(x => x[0] != "xok"))
+                {
+                    DefineSubroutine(subroutine);
+                }
             }
+            else
+            {
+                foreach (var subroutine in this.subroutines.Where(x => x[0] != "xok"))
+                {
+                    DefineSubroutine(subroutine);
+                }
+
+                DefineMainroutine();
+            }
+
             PostProcess(outFileName);
         }
 
@@ -496,17 +518,7 @@ namespace Cent.Core
             // サブルーチンに登録されている名称であれば
             else if (this.subroutineNames.Contains(token))
             {
-                if (this.callSubroutines.Contains(token))
-                {
-                    throw new ApplicationException("Not support recursive subroutine");
-                }
-
-                this.callSubroutines.Push(token);
-                foreach (var subToken in this.subroutines.Where(x => x[0] == token).Single().Skip(1))
-                {
-                    WriteTokens(subToken);
-                }
-                this.callSubroutines.Pop();
+                FenxeSubroutine(token);
             }
             // 外部関数に登録されている名称であれば
             else if (this.funcNames.ContainsKey(token))
@@ -642,11 +654,39 @@ namespace Cent.Core
                 }
             }
         }
+
+        private void DefineMainroutine()
+        {
+            MainroutinePreProcess();
+            foreach (var token in this.tokens)
+            {
+                WriteTokens(token);
+            }
+            MainroutinePostProcess();
+        }
+
+        private void DefineSubroutine(List<string> subroutine)
+        {
+            string name = subroutine.First();
+            SubroutinePreProcess(name);
+            foreach (var token in subroutine.Skip(1))
+            {
+                WriteTokens(token);
+            }
+            SubroutinePostProcess();
+        }
         
         protected abstract void PreProcess(string outFileName);
         protected abstract void PostProcess(string outFileName);
 
+        protected abstract void MainroutinePreProcess();
+        protected abstract void MainroutinePostProcess();
+
+        protected abstract void SubroutinePreProcess(string name);
+        protected abstract void SubroutinePostProcess();
+
         protected abstract void Value(uint result);
+        protected abstract void FenxeSubroutine(string subroutineName);
         protected abstract void Fenxe(string funcName, uint argc);
         protected abstract void Nac();
         protected abstract void Sna();

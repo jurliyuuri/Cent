@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Cent.Core
         readonly StringBuilder indent;
         readonly StringBuilder writer;
         
-        public CentToLua64(IList<string> inFileNames) : base(inFileNames)
+        public CentToLua64(IList<string> inFileNames) : base(inFileNames, false)
         {
             indent = new StringBuilder("");
             writer = new StringBuilder();
@@ -38,12 +39,42 @@ namespace Cent.Core
 
         protected override void PostProcess(string outFileName)
         {
+            this.writer.AppendLine("s_main()");
             this.writer.AppendLine("print(\"[\" .. table.concat(stack, \",\") .. \"]\")");
 
             using (var file = new StreamWriter(outFileName, false, new UTF8Encoding(false)))
             {
                 file.Write(this.writer.ToString());
             }
+        }
+
+        protected override void MainroutinePreProcess()
+        {
+            this.writer.Append(this.indent).AppendLine("local function s_main()");
+            this.indent.Append("  ");
+        }
+
+        protected override void MainroutinePostProcess()
+        {
+            this.indent.Remove(this.indent.Length - 2, 2);
+            this.writer.Append(this.indent).AppendLine("end");
+        }
+
+        protected override void SubroutinePreProcess(string name)
+        {
+            this.writer.Append(this.indent).Append("local function s_").Append(name).AppendLine("()");
+            this.indent.Append("  ");
+        }
+
+        protected override void SubroutinePostProcess()
+        {
+            this.indent.Remove(this.indent.Length - 2, 2);
+            this.writer.Append(this.indent).AppendLine("end");
+        }
+
+        protected override void FenxeSubroutine(string subroutineName)
+        {
+            this.writer.Append(this.indent).Append(subroutineName).AppendLine("()");
         }
 
         protected override void Fenxe(string funcName, uint argc)

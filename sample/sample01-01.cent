@@ -1,0 +1,6 @@
+
+'-
+  サブルーチン再帰呼び出し
+-'
+<recursive ach fi 1 nta ach 2 ata recursive if>
+10 0 recursive

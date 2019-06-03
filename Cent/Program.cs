@@ -31,17 +31,9 @@ namespace Cent
                         {
                             cent.Output("a.out");
                         }
-                        else if (Array.IndexOf(args, "--wat") != -1)
-                        {
-                            cent.Output("a.wat");
-                        }
                         else if (Array.IndexOf(args, "--lua64") != -1)
                         {
                             cent.Output("a.lua");
-                        }
-                        else if (Array.IndexOf(args, "--win64nasm") != -1)
-                        {
-                            cent.Output("a.asm");
                         }
                         else
                         {
@@ -85,17 +77,9 @@ namespace Cent
             {
                 return new CentToUbplBinary(inFileNames.Where(x => x != "--ubpl").ToList());
             }
-            else if (inFileNames.Any(x => x == "--wat"))
-            {
-                return new CentToWat(inFileNames.Where(x => x != "--wat").ToList());
-            }
             else if (inFileNames.Any(x => x == "--lua64"))
             {
                 return new CentToLua64(inFileNames.Where(x => x != "--lua64").ToList());
-            }
-            else if (inFileNames.Any(x => x == "--win64nasm"))
-            {
-                return new CentToWin64Nasm(inFileNames.Where(x => x != "--win64nasm").ToList());
             }
             else
             {
@@ -107,7 +91,7 @@ namespace Cent
 
         static void DisplayUsage()
         {
-            Console.WriteLine("cent.exe (-l|--ubpl|--wat|--lua64|--win64nasm) [inFileNames] (-o [outFileName]) (--optimize)");
+            Console.WriteLine("cent.exe (-l|--ubpl|--lua64) [inFileNames] (-o [outFileName]) (--optimize)");
         }
     }
 }

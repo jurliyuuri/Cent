@@ -39,15 +39,12 @@ namespace Cent.Core
                 this.writer.Append("xok ").AppendLine(func.Key);
             }
             
-            writer.AppendLine("'i'c");
-            writer.AppendLine("nta 4 f5 krz f1 f5@ krz f5 f1");
-
+            this.writer.AppendLine("'i'c");
         }
 
         protected override void PostProcess(string outFileName)
         {
-            writer.AppendLine("krz f1 f5");
-            writer.AppendLine("krz f5@ f1 ata 4 f5 krz f5@ xx");
+            this.writer.AppendLine("nll stack-top lifem 0");
 
             using (var file = new StreamWriter(outFileName, false, new UTF8Encoding(false)))
             {
@@ -55,32 +52,62 @@ namespace Cent.Core
             }
         }
 
+        protected override void MainroutinePreProcess()
+        {
+            this.writer.AppendLine("nta 8 f5 krz f2 f5+4@ krz stack-top f2")
+                .AppendLine("krz f3 f5@ krz f5 f3");
+        }
+
+        protected override void MainroutinePostProcess()
+        {
+            this.writer.AppendLine("krz f3 f5 krz f5@ f3")
+                .AppendLine("krz f5+4@ f2 ata 8 f5")
+                .AppendLine("krz f5@ xx");
+        }
+
+        protected override void SubroutinePreProcess(string name)
+        {
+            this.writer.Append("nll ").AppendLine(name)
+                .AppendLine("nta 4 f5 krz f3 f5@ krz f5 f3");
+        }
+
+        protected override void SubroutinePostProcess()
+        {
+            this.writer.AppendLine("krz f3 f5 krz f5@ f3 ata 4 f5")
+                .AppendLine("krz f5@ xx");
+        }
+
+        protected override void FenxeSubroutine(string subroutineName)
+        {
+            this.writer.AppendFormat("nta 4 f5 inj {0} xx f5@ ata 4 f5", subroutineName).AppendLine();
+        }
+
         protected override void Fenxe(string funcName, uint argc)
         {
-            if (argc == 0)
+            if (argc != 0)
             {
-                this.writer.AppendFormat("nta 4 f5 inj {0} xx f5@ krz f0 f5@", funcName);
+                this.writer.AppendFormat("nta {0} f5 nta {0} f2", argc * 4).AppendLine();
+                for (uint i = argc; i > 0; i--)
+                {
+                    this.writer.AppendFormat("krz f2+{0}@ f5+{1}@", i * 4, (argc - i) * 4).AppendLine();
+                }
             }
-            else
-            {
-                this.writer.AppendFormat("nta 4 f5 inj {0} xx f5@ ata {1} f5 krz f0 f5@", funcName, argc * 4);
-            }
-            this.writer.AppendLine();
+            this.writer.AppendFormat("nta 4 f5 inj {0} xx f5@ ata {1} f5 ata 4 f2 krz f0 f2@", funcName, (argc + 1) * 4).AppendLine();
         }
 
         protected override void Value(uint result)
         {
-            this.writer.AppendFormat("nta 4 f5 krz {0} f5@", result).AppendLine();
+            this.writer.AppendFormat("ata 4 f2 krz {0} f2@", result).AppendLine();
         }
 
         protected override void Nac()
         {
-            this.writer.AppendLine("dal 0 f5@");
+            this.writer.AppendLine("dal 0 f2@");
         }
 
         protected override void Sna()
         {
-            this.writer.AppendLine("dal 0 f5@ ata 1 f5@");
+            this.writer.AppendLine("dal 0 f2@ ata 1 f2@");
         }
 
         protected override void Ata()
@@ -125,17 +152,17 @@ namespace Cent.Core
 
         private void BiOperator(string op)
         {
-            this.writer.Append(op).AppendLine(" f5@ f5+4@ ata 4 f5");
+            this.writer.Append("nta 4 f2 ").Append(op).AppendLine(" f2+4@ f2@");
         }
 
         protected override void Lat()
         {
-            this.writer.AppendLine("lat f5@ f5+4@ f0 inj f0 f5+4@ f5@");
+            this.writer.AppendLine("lat f2@ f2+4294967292@ f0 inj f0 f2+4294967292@ f2@");
         }
 
         protected override void Latsna()
         {
-            this.writer.AppendLine("latsna f5@ f5+4@ f0 inj f0 f5+4@ f5@");
+            this.writer.AppendLine("latsna f2@ f2+4294967292@ f0 inj f0 f2+4294967292@ f2@");
         }
 
         protected override void Xtlo()
@@ -193,41 +220,42 @@ namespace Cent.Core
             int count = this.labelCount["leles"];
             this.labelCount["leles"] = ++count;
 
-            this.writer.AppendFormat("fi f5@ f5+4@ {0}", op)
+            this.writer.AppendFormat("fi f2@ f2+4294967292@ {0}", op)
                 .AppendFormat(" malkrz --leles-niv--{0} xx", count).AppendLine()
-                .AppendFormat("krz 0 f5+4@ krz --leles-situv--{0} xx", count).AppendLine()
-                .AppendFormat("nll --leles-niv--{0} krz 1 f5+4@", count).AppendLine()
-                .AppendFormat("nll --leles-situv--{0} ata 4 f5", count).AppendLine();
+                .AppendFormat("krz 0 f2+4294967292@ krz --leles-situv--{0} xx", count).AppendLine()
+                .AppendFormat("nll --leles-niv--{0} krz 1 f2+4294967292@", count).AppendLine()
+                .AppendFormat("nll --leles-situv--{0} kta 4 f2", count).AppendLine();
         }
 
         protected override void Tikl()
         {
-            this.writer.AppendLine("nta 4 f5 inj 3126834864 xx f5@ ata 8 f5");
+            this.writer.AppendLine("nta 4 f5 krz f2@ f5@ nta 4 f2")
+                .AppendLine("nta 4 f5 inj 3126834864 xx f5@ ata 8 f5");
         }
 
         protected override void Krz()
         {
-            this.writer.AppendLine("nta 4 f5 krz f5+4@ f5@");
+            this.writer.AppendLine("krz f2@ f2+4@ ata 4 f2");
         }
 
         protected override void Ach()
         {
-            this.writer.AppendLine("inj f5@ f5+4@ f5@");
+            this.writer.AppendLine("inj f2@ f2+4294967292@ f2@");
         }
 
         protected override void Roft()
         {
-            this.writer.AppendLine("krz f5+8@ f0 inj f5@ f5+4@ f5+8@ krz f0 f5@");
+            this.writer.AppendLine("krz f2+4294967288@ f0 inj f2@ f2+4294967292@ f2+4294967288@ krz f0 f2@");
         }
 
         protected override void Ycax()
         {
-            this.writer.AppendLine("ata 4 f5");
+            this.writer.AppendLine("nta 4 f2");
         }
 
         protected override void Pielyn()
         {
-            this.writer.AppendLine("krz f1 f5");
+            this.writer.AppendLine("krz stack-top f2");
         }
 
         protected override void Fal()
@@ -240,7 +268,7 @@ namespace Cent.Core
             this.jumpLabelStack.Push(lafLabel);
             this.jumpLabelStack.Push(falLabel);
 
-            this.writer.AppendFormat("nll {0} fi f5@ 0 clo malkrz {1} xx", falLabel, lafLabel).AppendLine();
+            this.writer.AppendFormat("nll {0} fi f2@ 0 clo malkrz {1} xx", falLabel, lafLabel).AppendLine();
         }
 
         protected override void Laf()
@@ -263,7 +291,7 @@ namespace Cent.Core
             this.jumpLabelStack.Push(ifLabel);
             this.jumpLabelStack.Push(olLabel);
 
-            this.writer.AppendFormat("fi f5@ 0 clo malkrz {0} xx", olLabel).AppendLine();
+            this.writer.AppendFormat("fi f2@ 0 clo malkrz {0} xx", olLabel).AppendLine();
         }
 
         protected override void Ol()
@@ -304,7 +332,7 @@ namespace Cent.Core
             this.jumpLabelStack.Push(oicecLabel);
             this.jumpLabelStack.Push(cecioLabel);
 
-            this.writer.AppendFormat("nll {0} fi f5@ f5+4@ llo malkrz {1} xx", cecioLabel, oicecLabel)
+            this.writer.AppendFormat("nll {0} fi f2@ f2+4294967292@ llo malkrz {1} xx", cecioLabel, oicecLabel)
                 .AppendLine();
         }
 
@@ -315,28 +343,28 @@ namespace Cent.Core
                 throw new ApplicationException("'oicec' cannot be here");
             }
 
-            this.writer.AppendFormat("ata 1 f5@ krz {0} xx nll {1} ata 8 f5",
+            this.writer.AppendFormat("ata 1 f2@ krz {0} xx nll {1} nta 8 f2",
                 this.jumpLabelStack.Pop(), this.jumpLabelStack.Pop()).AppendLine();
         }
 
         protected override void Kinfit()
         {
-            this.writer.AppendLine("krz f1 f0 nta f5 f0 dtosna 2 f0 nta 4 f5 krz f0 f5@");
+            this.writer.AppendLine("krz f2 f0 nta stack-top f0 dtosna 2 f0 ata 4 f2 krz f0 f2@");
         }
 
         protected override void Ata1()
         {
-            this.writer.AppendLine("ata 1 f5@");
+            this.writer.AppendLine("ata 1 f2@");
         }
 
         protected override void Nta1()
         {
-            this.writer.AppendLine("nta 1 f5@");
+            this.writer.AppendLine("nta 1 f2@");
         }
 
         protected override void RoftNia()
         {
-            this.writer.AppendLine("krz f5@ f0 inj f5+8@ f5+4@ f5@ krz f0 f5+8@");
+            this.writer.AppendLine("krz f2@ f0 inj f2+4294967288@ f2+4294967292@ f2@ krz f0 f2+4294967288@");
         }
     }
 }

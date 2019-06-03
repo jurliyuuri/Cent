@@ -28,6 +28,30 @@ namespace Cent.Core
             this.creator.PostProcess();
             this.creator.Write(outFileName);
         }
+        protected override void MainroutinePreProcess()
+        {
+            this.creator.MainroutinePreProcess();
+        }
+
+        protected override void MainroutinePostProcess()
+        {
+            this.creator.MainroutinePostProcess();
+        }
+
+        protected override void SubroutinePreProcess(string name)
+        {
+            this.creator.SubroutinePreProcess(name);
+        }
+
+        protected override void SubroutinePostProcess()
+        {
+            this.creator.SubroutinePostProcess();
+        }
+
+        protected override void FenxeSubroutine(string subroutineName)
+        {
+            this.creator.FenxeSubroutine(subroutineName);
+        }
 
         protected override void Fenxe(string funcName, uint argc)
         {
@@ -239,7 +263,6 @@ namespace Cent.Core
     class BinaryUbplCreator : CodeGenerator
     {
         readonly Dictionary<string, int> labelCount;
-        readonly Dictionary<string, bool> kuexok;
         readonly Stack<string> jumpLabelStack;
         readonly Dictionary<string, JumpLabel> labels;
 
@@ -252,24 +275,82 @@ namespace Cent.Core
                 ["fi"] = 0,
                 ["leles"] = 0,
             };
-            kuexok = new Dictionary<string, bool>();
             jumpLabelStack = new Stack<string>();
             labels = new Dictionary<string, JumpLabel>();
         }
 
         public void PreProcess()
         {
-            Nta(4, F5);
-            Krz(F1, Seti(F5));
-            Krz(F5, F1);
+            this.labels["stack-top"] = new JumpLabel();
         }
 
         public void PostProcess()
         {
-            Krz(F1, F5);
-            Krz(Seti(F5), F1);
+            Nll(this.labels["stack-top"]);
+            Lifem(0);
+        }
+
+        public void MainroutinePreProcess()
+        {
+            Nta(8, F5);
+            Krz(F2, Seti(F5+4));
+            Krz(this.labels["stack-top"], F2);
+            Krz(F3, Seti(F5));
+            Krz(F5, F3);
+        }
+
+        public void MainroutinePostProcess()
+        {
+            Krz(F3, F5);
+            Krz(Seti(F5), F3);
+            Krz(Seti(F5+4), F2);
+            Ata(8, F5);
+            Krz(Seti(F5), XX);
+        }
+
+        public void SubroutinePreProcess(string subroutineName)
+        {
+            JumpLabel label;
+            if (this.labels.ContainsKey(subroutineName))
+            {
+                label = this.labels[subroutineName];
+            }
+            else
+            {
+                label = new JumpLabel();
+                this.labels.Add(subroutineName, label);
+            }
+
+            Nll(label);
+            Nta(4, F5);
+            Krz(F3, Seti(F5));
+            Krz(F5, F3);
+        }
+
+        public void SubroutinePostProcess()
+        {
+            Krz(F3, F5);
+            Krz(Seti(F5), F3);
             Ata(4, F5);
             Krz(Seti(F5), XX);
+        }
+
+        public void FenxeSubroutine(string subroutineName)
+        {
+            JumpLabel label;
+            if (this.labels.ContainsKey(subroutineName))
+            {
+                label = this.labels[subroutineName];
+            }
+            else
+            {
+                label = new JumpLabel();
+                this.labels.Add(subroutineName, label);
+            }
+
+            Nta(4, F5);
+            Fnx(label, Seti(F5));
+            Ata(4, F5);
         }
 
         public void Fenxe(string funcName, uint argc)
@@ -285,88 +366,101 @@ namespace Cent.Core
                 this.labels.Add(funcName, label);
             }
 
-            if (argc == 0)
+            if (argc != 0)
             {
-                Nta(4, F5);
-                Fnx(label, Seti(F5));
-                Krz(F0, Seti(F5));
+                uint pushValue = argc * 4;
+                Nta(pushValue, F5);
+                Nta(pushValue, F2);
+
+                for (uint i = argc; i > 0; i--)
+                {
+                    uint value = i * 4;
+                    Krz(Seti(F2 + value), Seti(F5 + (pushValue + value)));
+                }
             }
-            else
-            {
-                Nta(4, F5);
-                Fnx(label, Seti(F5));
-                Ata(argc * 4, F5);
-                Krz(F0, Seti(F5));
-            }
+
+            Nta(4, F5);
+            Fnx(label, Seti(F5));
+            Ata((argc + 1) * 4, F5);
+            Ata(4, F2);
+            Krz(F0, Seti(F2));
         }
 
         public void Value(uint result)
         {
-            Nta(4, F5);
-            Krz(result, Seti(F5));
+            Ata(4, F2);
+            Krz(result, Seti(F2));
         }
 
         public void Nac()
         {
-            Dal(0, Seti(F5));
+            Dal(0, Seti(F2));
         }
 
         public void Sna()
         {
-            Dal(0, Seti(F5));
-            Ata(1, Seti(F5));
+            Dal(0, Seti(F2));
+            Ata(1, Seti(F2));
         }
 
         public void Ata()
         {
-            Ata(Seti(F5), Seti(F5 + 4));
+            Nta(4, F2);
+            Ata(Seti(F2 + 4), Seti(F2));
         }
 
         public void Nta()
         {
-            Nta(Seti(F5), Seti(F5 + 4));
+            Nta(4, F2);
+            Nta(Seti(F2 + 4), Seti(F2));
         }
 
         public void Ada()
         {
-            Ada(Seti(F5), Seti(F5 + 4));
+            Nta(4, F2);
+            Ada(Seti(F2 + 4), Seti(F2));
         }
 
         public void Ekc()
         {
-            Ekc(Seti(F5), Seti(F5 + 4));
+            Nta(4, F2);
+            Ekc(Seti(F2 + 4), Seti(F2));
         }
 
         public void Dto()
         {
-            Dto(Seti(F5), Seti(F5 + 4));
+            Nta(4, F2);
+            Dto(Seti(F2 + 4), Seti(F2));
         }
 
         public void Dro()
         {
-            Dro(Seti(F5), Seti(F5 + 4));
+            Nta(4, F2);
+            Dro(Seti(F2 + 4), Seti(F2));
         }
 
         public void Dtosna()
         {
-            Dtosna(Seti(F5), Seti(F5 + 4));
+            Nta(4, F2);
+            Dtosna(Seti(F2 + 4), Seti(F2));
         }
 
         public void Dal()
         {
-            Dal(Seti(F5), Seti(F5 + 4));
+            Nta(4, F2);
+            Dal(Seti(F2 + 4), Seti(F2));
         }
 
         public void Lat()
         {
-            Lat(Seti(F5), Seti(F5 + 4));
-            Anf(Seti(F5 + 4), Seti(F5));
+            Lat(Seti(F2), Seti(F5 + 4294967292));
+            Anf(Seti(F2 + 4294967292), Seti(F2));
         }
 
         public void Latsna()
         {
-            Latsna(Seti(F5), Seti(F5 + 4));
-            Anf(Seti(F5 + 4), Seti(F5));
+            Latsna(Seti(F2), Seti(F5 + 4294967292));
+            Anf(Seti(F2 + 4294967292), Seti(F2));
         }
 
         private void Compare(FiType type)
@@ -374,14 +468,14 @@ namespace Cent.Core
             JumpLabel niv = new JumpLabel();
             JumpLabel situv = new JumpLabel();
             
-            Fi(Seti(F5), Seti(F5 + 4), type);
+            Fi(Seti(F2), Seti(F2 + 4294967292), type);
             Malkrz(niv, XX);
-            Krz(0, Seti(F5 + 4));
+            Krz(0, Seti(F2 + 4294967292));
             Krz(situv, XX);
             Nll(niv);
-            Krz(1, Seti(F5 + 4));
+            Krz(1, Seti(F2 + 4294967292));
             Nll(situv);
-            Ata(4, F5);
+            Nta(4, F2);
         }
 
         public void Xtlo()
@@ -436,38 +530,38 @@ namespace Cent.Core
 
         public void Tikl()
         {
-            Klon(0xFF, Seti(F5));
-            Ata(4, F5);
+            Klon(0xFF, Seti(F2));
+            Nta(4, F2);
         }
 
         public void Krz()
         {
-            Nta(4, F5);
-            Krz(Seti(F5 + 4), Seti(F5));
+            Krz(Seti(F2), Seti(F2 + 4));
+            Ata(4, F2);
         }
 
         public void Ach()
         {
-            Mte(Seti(F5), Seti(F5 + 4));
-            Anf(Seti(F5 + 4), Seti(F5));
+            Mte(Seti(F2), Seti(F2 + 4294967292));
+            Anf(Seti(F2 + 4294967292), Seti(F2));
         }
 
         public void Roft()
         {
-            Krz(Seti(F5 + 8), F0);
-            Mte(Seti(F5), Seti(F5 + 4));
-            Anf(Seti(F5 + 4), Seti(F5 + 8));
-            Krz(F0, Seti(F5));
+            Krz(Seti(F2 + 4294967288), F0);
+            Mte(Seti(F2), Seti(F2 + 4294967292));
+            Anf(Seti(F2 + 4294967292), Seti(F2 + 4294967288));
+            Krz(F0, Seti(F2));
         }
 
         public void Ycax()
         {
-            Ata(4, F5);
+            Nta(4, F2);
         }
 
         public void Pielyn()
         {
-            Krz(F1, F5);
+            Krz(this.labels["stack-top"], F2);
         }
 
         public void Fal()
@@ -486,7 +580,7 @@ namespace Cent.Core
             this.labels.Add(fal, falLabel);
 
             Nll(falLabel);
-            Fi(Seti(F5), 0, CLO);
+            Fi(Seti(F2), 0, CLO);
             Malkrz(lafLabel, XX);
         }
 
@@ -523,7 +617,7 @@ namespace Cent.Core
             this.labels.Add(_if, ifLabel);
             this.labels.Add(ol, olLabel);
 
-            Fi(Seti(F5), 0, CLO);
+            Fi(Seti(F2), 0, CLO);
             Malkrz(olLabel, XX);
         }
 
@@ -580,7 +674,7 @@ namespace Cent.Core
             this.labels.Add(cecio, cecioLabel);
 
             Nll(cecioLabel);
-            Fi(Seti(F5), Seti(F5 + 4), LLO);
+            Fi(Seti(F2), Seti(F2 + 4294967292), LLO);
             Malkrz(oicecLabel, XX);
         }
 
@@ -595,10 +689,10 @@ namespace Cent.Core
 
             string oicec = this.jumpLabelStack.Pop();
 
-            Ata(1, Seti(F5));
+            Ata(1, Seti(F2));
             Krz(this.labels[cecio], XX);
             Nll(this.labels[oicec]);
-            Ata(8, F5);
+            Nta(8, F2);
 
             this.labels.Remove(cecio);
             this.labels.Remove(oicec);
@@ -606,29 +700,29 @@ namespace Cent.Core
 
         public void Kinfit()
         {
-            Krz(F1, F0);
-            Nta(F5, F0);
+            Krz(F2, F0);
+            Nta(this.labels["stack-top"], F0);
             Dtosna(2, F0);
-            Nta(4, F5);
-            Krz(F0, Seti(F5));
+            Ata(4, F2);
+            Krz(F0, Seti(F2));
         }
 
         public void Ata1()
         {
-            Ata(1, Seti(F5));
+            Ata(1, Seti(F2));
         }
 
         public void Nta1()
         {
-            Nta(1, Seti(F5));
+            Nta(1, Seti(F2));
         }
 
         public void RoftNia()
         {
-            Krz(Seti(F5), F0);
-            Mte(Seti(F5 + 4), Seti(F5 + 8));
-            Anf(Seti(F5), Seti(F5 + 4));
-            Krz(F0, Seti(F5 + 8));
+            Krz(Seti(F2), F0);
+            Mte(Seti(F2 + 4294967292), Seti(F2 + 4294967288));
+            Anf(Seti(F2), Seti(F2 + 4294967292));
+            Krz(F0, Seti(F2 + 4294967288));
         }
     }
 }
