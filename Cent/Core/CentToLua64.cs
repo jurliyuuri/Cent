@@ -383,5 +383,18 @@ namespace Cent.Core
                 .Append("stack[#stack - 2], stack[#stack - 1], stack[#stack]")
                 .AppendLine(" = stack[#stack], stack[#stack - 2], stack[#stack - 1]");
         }
+
+        protected override void Lat32()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(t2 * t1)");
+        }
+
+        protected override void Latsna32()
+        {
+            this.writer.Append(this.indent).AppendLine("t1, t2 = table.remove(stack), stack[#stack]")
+                .Append(this.indent).AppendLine("stack[#stack] = to32(to64s(t2) * to64s(t1))");
+        }
+
     }
 }

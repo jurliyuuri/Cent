@@ -157,12 +157,12 @@ namespace Cent.Core
 
         protected override void Lat()
         {
-            this.writer.AppendLine("lat f2@ f2+4294967292@ f0 inj f0 f2+4294967292@ f2@");
+            this.writer.AppendLine("lat f2@ f2+4294967292@ f0 krz f0 f2@");
         }
 
         protected override void Latsna()
         {
-            this.writer.AppendLine("latsna f2@ f2+4294967292@ f0 inj f0 f2+4294967292@ f2@");
+            this.writer.AppendLine("latsna f2@ f2+4294967292@ f0 krz f0 f2@");
         }
 
         protected override void Xtlo()
@@ -365,6 +365,16 @@ namespace Cent.Core
         protected override void RoftNia()
         {
             this.writer.AppendLine("krz f2@ f0 inj f2+4294967288@ f2+4294967292@ f2@ krz f0 f2+4294967288@");
+        }
+
+        protected override void Lat32()
+        {
+            this.writer.Append("nta 4 f2 ").AppendLine("lat f2+4@ f2@ f2@");
+        }
+
+        protected override void Latsna32()
+        {
+            this.writer.Append("nta 4 f2 ").AppendLine("latsna f2+4@ f2@ f2@");
         }
     }
 }

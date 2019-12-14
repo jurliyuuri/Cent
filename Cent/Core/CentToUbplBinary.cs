@@ -258,6 +258,16 @@ namespace Cent.Core
         {
             this.creator.RoftNia();
         }
+
+        protected override void Lat32()
+        {
+            this.creator.Lat32();
+        }
+
+        protected override void Latsna32()
+        {
+            this.creator.Latsna32();
+        }
     }
 
     class BinaryUbplCreator : CodeGenerator
@@ -453,14 +463,14 @@ namespace Cent.Core
 
         public void Lat()
         {
-            Lat(Seti(F2), Seti(F5 + 4294967292));
-            Anf(Seti(F2 + 4294967292), Seti(F2));
+            Lat(Seti(F2), Seti(F2 + 4294967292));
+            Anf(Seti(F2), Seti(F2 + 4294967292));
         }
 
         public void Latsna()
         {
-            Latsna(Seti(F2), Seti(F5 + 4294967292));
-            Anf(Seti(F2 + 4294967292), Seti(F2));
+            Latsna(Seti(F2), Seti(F2 + 4294967292));
+            Anf(Seti(F2), Seti(F2 + 4294967292));
         }
 
         private void Compare(FiType type)
@@ -723,6 +733,20 @@ namespace Cent.Core
             Mte(Seti(F2 + 4294967292), Seti(F2 + 4294967288));
             Anf(Seti(F2), Seti(F2 + 4294967292));
             Krz(F0, Seti(F2 + 4294967288));
+        }
+
+        public void Lat32()
+        {
+            Nta(4, F2);
+            Lat(Seti(F2 + 4), Seti(F2));
+            Anf(Seti(F2), Seti(F2));
+        }
+
+        public void Latsna32()
+        {
+            Nta(4, F2);
+            Latsna(Seti(F2 + 4), Seti(F2));
+            Anf(Seti(F2), Seti(F2));
         }
     }
 }

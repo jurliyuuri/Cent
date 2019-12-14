@@ -25,13 +25,13 @@ namespace Cent.Core
                     ["kak"] = 2, ["ada"] = 2, ["ekc"] = 2,
                     ["dal"] = 2, ["dto"] = 2, ["dtosna"] = 2,
                     ["dro"] = 2, ["dRo"] = 2,
-                    ["lat"] = 3, ["latsna"] = 3,
+                    ["lat"] = 2, ["latsna"] = 2,
                 });
 
             centOperatorMap = new System.Collections.ObjectModel.ReadOnlyDictionary<string, int>(
                 new Dictionary<string, int>
                 {
-                    ["."] = 1,
+                    ["tikl"] = 1,
                     ["krz"] = 1, ["kRz"] = 1, ["ach"] = 2,
                     ["roft"] = 1, ["ycax"] = 1, ["pielyn"] = 0,
                     ["fal"] = 1, ["laf"] = 0,
@@ -81,7 +81,7 @@ namespace Cent.Core
 
         protected CentTranscompiler(string[] inFiles, bool isTopMain) : this(inFiles.ToList(), isTopMain) { }
 
-        protected void Output(string outFileName)
+        public void Output(string outFileName)
         {
             if(!this.InFileNames.All(x => x.EndsWith(".cent")))
             {
@@ -299,67 +299,58 @@ namespace Cent.Core
         /// <param name="code"></param>
         private void CheckCode(IEnumerable<string> code)
         {
-            int falCount = 0;
-            int lafCount = 0;
-            int fiCount = 0;
-            int olCount = 0;
-            int ifCount = 0;
-            int cecioCount = 0;
-            int oicecCount = 0;
+            Stack<string> stack = new Stack<string>();
+            Dictionary<string, string> needWord = new Dictionary<string, string>
+            {
+                ["fal"] = "laf",
+                ["fi"] = "if",
+                ["ol"] = "if",
+                ["cecio"] = "oicec",
+            };
 
             foreach (var item in code)
             {
+                string top;
                 switch (item)
                 {
                     case "fal":
-                        falCount++;
+                    case "fi":
+                    case "cecio":
+                        stack.Push(item);
                         break;
                     case "laf":
-                        lafCount++;
-                        break;
-                    case "fi":
-                        fiCount++;
+                    case "if":
+                    case "oicec":
+                        top = stack.Pop();
+                        if (needWord[top] != item)
+                        {
+                            throw new ApplicationException($"invalid keyword: need: {needWord[top]}, value: {item}");
+                        }
                         break;
                     case "ol":
-                        olCount++;
-                        break;
-                    case "if":
-                        ifCount++;
-                        break;
-                    case "cecio":
-                        cecioCount++;
-                        break;
-                    case "oicec":
-                        oicecCount++;
+                        top = stack.Pop();
+                        if (top != "fi")
+                        {
+                            throw new ApplicationException($"invalid keyword: need: {needWord[top]}, value: {item}");
+                        }
+                        else
+                        {
+                            stack.Push("ol");
+                        }
                         break;
                 }
             }
 
-            if (falCount != lafCount)
+            if (stack.Any())
             {
-                throw new ApplicationException("count of 'laf' don't equals to count of 'fal'.");
-            }
-
-            if (fiCount != ifCount)
-            {
-                throw new ApplicationException("count of 'if' don't equals to count of 'fi'.");
-            }
-
-            if (fiCount < olCount)
-            {
-                throw new ApplicationException("count of 'ol' don't less than or equals to count of 'fi'.");
-            }
-
-            if (cecioCount != oicecCount)
-            {
-                throw new ApplicationException("count of 'oicec' don't equals to count of 'cecio'.");
+                throw new ApplicationException("end of control statement");
             }
         }
 
         private List<string> Optimize(List<string> tokenList)
         {
             List<string> tokens = new List<string>();
-            string prev = "";
+            string prev = string.Empty;
 
             foreach (var token in tokenList)
             {
@@ -369,12 +360,12 @@ namespace Cent.Core
                     (token == "sna" && prev == "sna"))
                 {
                     tokens.RemoveAt(tokens.Count - 1);
-                    prev = tokens.LastOrDefault() ?? "";
+                    prev = tokens.LastOrDefault() ?? string.Empty;
                 }
                 else if (token == "laf" && prev == "fal")
                 {
                     tokens.RemoveAt(tokens.Count - 1);
-                    prev = tokens.LastOrDefault() ?? "";
+                    prev = tokens.LastOrDefault() ?? string.Empty;
                 }
                 else if (token == "roft")
                 {
@@ -386,7 +377,7 @@ namespace Cent.Core
                             break;
                         case "<>roft-nia":
                             tokens.RemoveAt(tokens.Count - 1);
-                            prev = tokens.LastOrDefault() ?? "";
+                            prev = tokens.LastOrDefault() ?? string.Empty;
                             break;
                         default:
                             tokens.Add(token);
@@ -394,7 +385,7 @@ namespace Cent.Core
                             break;
                     }
                 }
-                else if (token == "kinfit" && (prev == "" || prev == "pielyn"))
+                else if (token == "kinfit" && (prev == string.Empty || prev == "pielyn"))
                 {
                     tokens.Add("0");
                     prev = "0";
@@ -404,7 +395,7 @@ namespace Cent.Core
                     if (tokens[tokens.Count - 2] == "<>nta1")
                     {
                         tokens.RemoveRange(tokens.Count - 2, 2);
-                        prev = tokens.LastOrDefault() ?? "";
+                        prev = tokens.LastOrDefault() ?? string.Empty;
                     }
                     else
                     {
@@ -417,7 +408,7 @@ namespace Cent.Core
                     if (tokens[tokens.Count - 2] == "<>ata1")
                     {
                         tokens.RemoveRange(tokens.Count - 2, 2);
-                        prev = tokens.LastOrDefault() ?? "";
+                        prev = tokens.LastOrDefault() ?? string.Empty;
                     }
                     else
                     {
@@ -425,10 +416,61 @@ namespace Cent.Core
                         prev = "<>nta1";
                     }
                 }
+                else if (token == "ycax")
+                {
+                    if (prev == "lat")
+                    {
+                        tokens[tokens.Count - 1] = "<>lat32";
+                        prev = "<>lat32";
+                    }
+                    else if (prev == "latsna")
+                    {
+                        tokens[tokens.Count - 1] = "<>latsna32";
+                        prev = "<>latsna32";
+                    }
+                    else if (prev.All(char.IsDigit))
+                    {
+                        tokens.RemoveAt(tokens.Count - 1);
+                        prev = tokens.LastOrDefault() ?? string.Empty;
+                    }
+                }
                 else if (prev.All(char.IsDigit))
                 {
                     switch (token)
                     {
+                        case "ata":
+                        case "nta":
+                            if (prev == "0")
+                            {
+                                tokens.RemoveAt(tokens.Count - 1);
+                                prev = tokens.LastOrDefault() ?? string.Empty;
+                            }
+                            else
+                            {
+                                tokens.Add(token);
+                                prev = token;
+                            }
+                            break;
+                        case "lat":
+                        case "latsna":
+                            if (prev == "1")
+                            {
+                                tokens[tokens.Count - 1] = "0";
+                                prev = "0";
+                            }
+                            else if (prev == "0")
+                            {
+                                tokens[tokens.Count - 1] = "ycax";
+                                tokens.Add("0");
+                                tokens.Add("0");
+                                prev = "0";
+                            }
+                            else
+                            {
+                                tokens.Add(token);
+                                prev = token;
+                            }
+                            break;
                         case "krz":
                             tokens.Add(prev);
                             break;
@@ -443,10 +485,6 @@ namespace Cent.Core
                                 }
                             }
                             tokens.Add(token);
-                            prev = token;
-                            break;
-                        case "ycax":
-                            tokens.RemoveAt(tokens.Count - 1);
                             prev = token;
                             break;
                         default:
@@ -465,7 +503,6 @@ namespace Cent.Core
             return tokens;
         }
         
-
         /// <summary>
         /// 変換先出力
         /// </summary>
@@ -648,6 +685,12 @@ namespace Cent.Core
                     case "<>roft-nia":
                         RoftNia();
                         break;
+                    case "<>lat32":
+                        Lat32();
+                        break;
+                    case "<>latsna32":
+                        Latsna32();
+                        break;
                     case "lykl":
                     default:
                         throw new ApplicationException($"Unknown word: '{token}'");
@@ -741,6 +784,18 @@ namespace Cent.Core
         {
             Roft();
             Roft();
+        }
+
+        protected virtual void Lat32()
+        {
+            Lat();
+            Ycax();
+        }
+
+        protected virtual void Latsna32()
+        {
+            Latsna();
+            Ycax();
         }
         
         /// <summary>
