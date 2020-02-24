@@ -7,296 +7,294 @@ namespace Cent.Core
 {
     class CentToUbplBinary : CentTranscompiler
     {
-        readonly BinaryUbplCreator creator;
+        private readonly BinaryUbplCreator _creator;
 
-        public CentToUbplBinary(List<string> inFileNames) : base(inFileNames)
+        public CentToUbplBinary(IEnumerable<string> inFileNames) : base(inFileNames)
         {
-            this.creator = new BinaryUbplCreator();
+            _creator = new BinaryUbplCreator();
         }
 
-        public CentToUbplBinary(string[] inFileNames) : this(inFileNames.ToList())
-        {
-        }
+        public CentToUbplBinary(string[] inFileNames) : this(inFileNames.ToList()) { }
 
         protected override void PreProcess(string outFileName)
         {
-            this.creator.PreProcess();
+            _creator.PreProcess();
         }
 
         protected override void PostProcess(string outFileName)
         {
-            this.creator.PostProcess();
-            this.creator.Write(outFileName);
+            _creator.PostProcess();
+            _creator.Write(outFileName);
         }
         protected override void MainroutinePreProcess()
         {
-            this.creator.MainroutinePreProcess();
+            _creator.MainroutinePreProcess();
         }
 
         protected override void MainroutinePostProcess()
         {
-            this.creator.MainroutinePostProcess();
+            _creator.MainroutinePostProcess();
         }
 
         protected override void SubroutinePreProcess(string name)
         {
-            this.creator.SubroutinePreProcess(name);
+            _creator.SubroutinePreProcess(name);
         }
 
         protected override void SubroutinePostProcess()
         {
-            this.creator.SubroutinePostProcess();
+            _creator.SubroutinePostProcess();
         }
 
         protected override void FenxeSubroutine(string subroutineName)
         {
-            this.creator.FenxeSubroutine(subroutineName);
+            _creator.FenxeSubroutine(subroutineName);
         }
 
         protected override void Fenxe(string funcName, uint argc)
         {
-            this.creator.Fenxe(funcName, argc);
+            _creator.Fenxe(funcName, argc);
         }
 
         protected override void Value(uint result)
         {
-            this.creator.Value(result);
+            _creator.Value(result);
         }
 
         protected override void Nac()
         {
-            this.creator.Nac();
+            _creator.Nac();
         }
 
         protected override void Sna()
         {
-            this.creator.Sna();
+            _creator.Sna();
         }
 
         protected override void Ata()
         {
-            this.creator.Ata();
+            _creator.Ata();
         }
 
         protected override void Nta()
         {
-            this.creator.Nta();
+            _creator.Nta();
         }
 
         protected override void Ada()
         {
-            this.creator.Ada();
+            _creator.Ada();
         }
 
         protected override void Ekc()
         {
-            this.creator.Ekc();
+            _creator.Ekc();
         }
 
         protected override void Dto()
         {
-            this.creator.Dto();
+            _creator.Dto();
         }
 
         protected override void Dro()
         {
-            this.creator.Dro();
+            _creator.Dro();
         }
 
         protected override void Dtosna()
         {
-            this.creator.Dtosna();
+            _creator.Dtosna();
         }
 
         protected override void Dal()
         {
-            this.creator.Dal();
+            _creator.Dal();
         }
 
         protected override void Lat()
         {
-            this.creator.Lat();
+            _creator.Lat();
         }
 
         protected override void Latsna()
         {
-            this.creator.Latsna();
+            _creator.Latsna();
         }
 
         protected override void Xtlo()
         {
-            this.creator.Xtlo();
+            _creator.Xtlo();
         }
 
         protected override void Xylo()
         {
-            this.creator.Xylo();
+            _creator.Xylo();
         }
 
         protected override void Clo()
         {
-            this.creator.Clo();
+            _creator.Clo();
         }
 
         protected override void Niv()
         {
-            this.creator.Niv();
+            _creator.Niv();
         }
 
         protected override void Llo()
         {
 
-            this.creator.Llo();
+            _creator.Llo();
         }
 
         protected override void Xolo()
         {
-            this.creator.Xolo();
+            _creator.Xolo();
         }
 
         protected override void Xtlonys()
         {
-            this.creator.Xtlonys();
+            _creator.Xtlonys();
         }
 
         protected override void Xylonys()
         {
-            this.creator.Xylonys();
+            _creator.Xylonys();
         }
 
         protected override void Llonys()
         {
-            this.creator.Llonys();
+            _creator.Llonys();
         }
 
         protected override void Xolonys()
         {
-            this.creator.Xolonys();
+            _creator.Xolonys();
         }
 
         protected override void Tikl()
         {
-            this.creator.Tikl();
+            _creator.Tikl();
         }
 
         protected override void Krz()
         {
-            this.creator.Krz();
+            _creator.Krz();
         }
 
         protected override void Ach()
         {
-            this.creator.Ach();
+            _creator.Ach();
         }
 
         protected override void Roft()
         {
-            this.creator.Roft();
+            _creator.Roft();
         }
 
         protected override void Ycax()
         {
-            this.creator.Ycax();
+            _creator.Ycax();
         }
 
         protected override void Pielyn()
         {
-            this.creator.Pielyn();
+            _creator.Pielyn();
         }
 
         protected override void Fal()
         {
-            this.creator.Fal();
+            _creator.Fal();
         }
 
         protected override void Laf()
         {
-            this.creator.Laf();
+            _creator.Laf();
         }
 
         protected override void Fi()
         {
-            this.creator.Fi();
+            _creator.Fi();
         }
 
         protected override void Ol()
         {
-            this.creator.Ol();
+            _creator.Ol();
         }
 
         protected override void If()
         {
-            this.creator.If();
+            _creator.If();
         }
 
         protected override void Cecio()
         {
-            this.creator.Cecio();
+            _creator.Cecio();
         }
 
         protected override void Oicec()
         {
-            this.creator.Oicec();
+            _creator.Oicec();
         }
 
         protected override void Kinfit()
         {
-            this.creator.Kinfit();
+            _creator.Kinfit();
         }
 
         protected override void Ata1()
         {
-            this.creator.Ata1();
+            _creator.Ata1();
         }
 
         protected override void Nta1()
         {
-            this.creator.Nta1();
+            _creator.Nta1();
         }
 
         protected override void RoftNia()
         {
-            this.creator.RoftNia();
+            _creator.RoftNia();
         }
 
         protected override void Lat32()
         {
-            this.creator.Lat32();
+            _creator.Lat32();
         }
 
         protected override void Latsna32()
         {
-            this.creator.Latsna32();
+            _creator.Latsna32();
         }
     }
 
     class BinaryUbplCreator : CodeGenerator
     {
-        readonly Dictionary<string, int> labelCount;
-        readonly Stack<string> jumpLabelStack;
-        readonly Dictionary<string, JumpLabel> labels;
+        private readonly Dictionary<string, int> _labelCount;
+        private readonly Stack<string> _jumpLabelStack;
+        private readonly Dictionary<string, JumpLabel> _labels;
 
         public BinaryUbplCreator() : base()
         {
-            labelCount = new Dictionary<string, int>()
+            _labelCount = new Dictionary<string, int>()
             {
                 ["cecio"] = 0,
                 ["fal"] = 0,
                 ["fi"] = 0,
                 ["leles"] = 0,
             };
-            jumpLabelStack = new Stack<string>();
-            labels = new Dictionary<string, JumpLabel>();
+            _jumpLabelStack = new Stack<string>();
+            _labels = new Dictionary<string, JumpLabel>();
         }
 
         public void PreProcess()
         {
-            this.labels["stack-top"] = new JumpLabel();
+            _labels["stack-top"] = new JumpLabel();
         }
 
         public void PostProcess()
         {
-            Nll(this.labels["stack-top"]);
+            Nll(_labels["stack-top"]);
             Lifem(0);
         }
 
@@ -304,7 +302,7 @@ namespace Cent.Core
         {
             Nta(8, F5);
             Krz(F2, Seti(F5+4));
-            Krz(this.labels["stack-top"], F2);
+            Krz(_labels["stack-top"], F2);
             Krz(F3, Seti(F5));
             Krz(F5, F3);
         }
@@ -321,14 +319,14 @@ namespace Cent.Core
         public void SubroutinePreProcess(string subroutineName)
         {
             JumpLabel label;
-            if (this.labels.ContainsKey(subroutineName))
+            if (_labels.ContainsKey(subroutineName))
             {
-                label = this.labels[subroutineName];
+                label = _labels[subroutineName];
             }
             else
             {
                 label = new JumpLabel();
-                this.labels.Add(subroutineName, label);
+                _labels.Add(subroutineName, label);
             }
 
             Nll(label);
@@ -348,14 +346,14 @@ namespace Cent.Core
         public void FenxeSubroutine(string subroutineName)
         {
             JumpLabel label;
-            if (this.labels.ContainsKey(subroutineName))
+            if (_labels.ContainsKey(subroutineName))
             {
-                label = this.labels[subroutineName];
+                label = _labels[subroutineName];
             }
             else
             {
                 label = new JumpLabel();
-                this.labels.Add(subroutineName, label);
+                _labels.Add(subroutineName, label);
             }
 
             Nta(4, F5);
@@ -366,14 +364,14 @@ namespace Cent.Core
         public void Fenxe(string funcName, uint argc)
         {
             JumpLabel label;
-            if(this.labels.ContainsKey(funcName))
+            if(_labels.ContainsKey(funcName))
             {
-                label = this.labels[funcName];
+                label = _labels[funcName];
             }
             else
             {
                 label = new JumpLabel();
-                this.labels.Add(funcName, label);
+                _labels.Add(funcName, label);
             }
 
             if (argc != 0)
@@ -463,14 +461,14 @@ namespace Cent.Core
 
         public void Lat()
         {
-            Lat(Seti(F2), Seti(F2 + 4294967292));
-            Anf(Seti(F2), Seti(F2 + 4294967292));
+            Lat(Seti(F2), Seti(F2 - 4));
+            Anf(Seti(F2), Seti(F2 - 4));
         }
 
         public void Latsna()
         {
-            Latsna(Seti(F2), Seti(F2 + 4294967292));
-            Anf(Seti(F2), Seti(F2 + 4294967292));
+            Latsna(Seti(F2), Seti(F2 - 4));
+            Anf(Seti(F2), Seti(F2 - 4));
         }
 
         private void Compare(FiType type)
@@ -478,12 +476,12 @@ namespace Cent.Core
             JumpLabel niv = new JumpLabel();
             JumpLabel situv = new JumpLabel();
             
-            Fi(Seti(F2), Seti(F2 + 4294967292), type);
+            Fi(Seti(F2), Seti(F2 - 4), type);
             Malkrz(niv, XX);
-            Krz(0, Seti(F2 + 4294967292));
+            Krz(0, Seti(F2 - 4));
             Krz(situv, XX);
             Nll(niv);
-            Krz(1, Seti(F2 + 4294967292));
+            Krz(1, Seti(F2 - 4));
             Nll(situv);
             Nta(4, F2);
         }
@@ -552,15 +550,15 @@ namespace Cent.Core
 
         public void Ach()
         {
-            Mte(Seti(F2), Seti(F2 + 4294967292));
-            Anf(Seti(F2 + 4294967292), Seti(F2));
+            Mte(Seti(F2), Seti(F2 - 4));
+            Anf(Seti(F2 - 4), Seti(F2));
         }
 
         public void Roft()
         {
-            Krz(Seti(F2 + 4294967288), F0);
-            Mte(Seti(F2), Seti(F2 + 4294967292));
-            Anf(Seti(F2 + 4294967292), Seti(F2 + 4294967288));
+            Krz(Seti(F2 - 8), F0);
+            Mte(Seti(F2), Seti(F2 - 4));
+            Anf(Seti(F2 - 4), Seti(F2 - 8));
             Krz(F0, Seti(F2));
         }
 
@@ -571,23 +569,23 @@ namespace Cent.Core
 
         public void Pielyn()
         {
-            Krz(this.labels["stack-top"], F2);
+            Krz(_labels["stack-top"], F2);
         }
 
         public void Fal()
         {
-            this.labelCount["fal"] += 1;
-            string laf = $"laf@{this.labelCount["fal"]}";
-            string fal = $"fal@{this.labelCount["fal"]}";
+            _labelCount["fal"] += 1;
+            string laf = $"laf@{_labelCount["fal"]}";
+            string fal = $"fal@{_labelCount["fal"]}";
 
             JumpLabel lafLabel = new JumpLabel();
             JumpLabel falLabel = new JumpLabel();
 
-            this.jumpLabelStack.Push(laf);
-            this.jumpLabelStack.Push(fal);
+            _jumpLabelStack.Push(laf);
+            _jumpLabelStack.Push(fal);
 
-            this.labels.Add(laf, lafLabel);
-            this.labels.Add(fal, falLabel);
+            _labels.Add(laf, lafLabel);
+            _labels.Add(fal, falLabel);
 
             Nll(falLabel);
             Fi(Seti(F2), 0, CLO);
@@ -596,36 +594,36 @@ namespace Cent.Core
 
         public void Laf()
         {
-            string fal = this.jumpLabelStack.Pop();
+            string fal = _jumpLabelStack.Pop();
             if (!fal.StartsWith("fal"))
             {
                 throw new ApplicationException("'laf' cannot be here");
             }
 
-            string laf = this.jumpLabelStack.Pop();
+            string laf = _jumpLabelStack.Pop();
 
-            Krz(this.labels[fal], XX);
-            Nll(this.labels[laf]);
+            Krz(_labels[fal], XX);
+            Nll(_labels[laf]);
 
-            this.labels.Remove(fal);
-            this.labels.Remove(laf);
+            _labels.Remove(fal);
+            _labels.Remove(laf);
         }
 
         public void Fi()
         {
-            this.labelCount["fi"] += 1;
+            _labelCount["fi"] += 1;
 
-            string _if = $"if@{this.labelCount["fi"]}";
-            string ol = $"ol@{this.labelCount["fi"]}";
+            string _if = $"if@{_labelCount["fi"]}";
+            string ol = $"ol@{_labelCount["fi"]}";
 
             JumpLabel ifLabel = new JumpLabel();
             JumpLabel olLabel = new JumpLabel();
 
-            this.jumpLabelStack.Push(_if);
-            this.jumpLabelStack.Push(ol);
+            _jumpLabelStack.Push(_if);
+            _jumpLabelStack.Push(ol);
 
-            this.labels.Add(_if, ifLabel);
-            this.labels.Add(ol, olLabel);
+            _labels.Add(_if, ifLabel);
+            _labels.Add(ol, olLabel);
 
             Fi(Seti(F2), 0, CLO);
             Malkrz(olLabel, XX);
@@ -633,24 +631,24 @@ namespace Cent.Core
 
         public void Ol()
         {
-            string ol = this.jumpLabelStack.Pop();
+            string ol = _jumpLabelStack.Pop();
             if (!ol.StartsWith("ol"))
             {
                 throw new ApplicationException("'ol' cannot be here");
             }
 
-            string _if = this.jumpLabelStack.Peek();
+            string _if = _jumpLabelStack.Peek();
 
-            Krz(this.labels[_if], XX);
-            Nll(this.labels[ol]);
+            Krz(_labels[_if], XX);
+            Nll(_labels[ol]);
             Krz(F0, F0);
             
-            this.labels.Remove(ol);
+            _labels.Remove(ol);
         }
 
         public void If()
         {
-            string label = this.jumpLabelStack.Pop();
+            string label = _jumpLabelStack.Pop();
 
             if (!(label.StartsWith("ol") || label.StartsWith("if")))
             {
@@ -659,59 +657,59 @@ namespace Cent.Core
 
             if (label.StartsWith("ol"))
             {
-                this.jumpLabelStack.Pop();
+                _jumpLabelStack.Pop();
             }
 
-            Nll(this.labels[label]);
+            Nll(_labels[label]);
 
-            this.labels.Remove(label);
+            _labels.Remove(label);
         }
 
         public void Cecio()
         {
-            this.labelCount["cecio"] += 1;
+            _labelCount["cecio"] += 1;
 
-            string oicec = $"oicec@{this.labelCount["cecio"]}";
-            string cecio = $"cecio@{this.labelCount["cecio"]}";
+            string oicec = $"oicec@{_labelCount["cecio"]}";
+            string cecio = $"cecio@{_labelCount["cecio"]}";
 
             JumpLabel oicecLabel = new JumpLabel();
             JumpLabel cecioLabel = new JumpLabel();
 
-            this.jumpLabelStack.Push(oicec);
-            this.jumpLabelStack.Push(cecio);
+            _jumpLabelStack.Push(oicec);
+            _jumpLabelStack.Push(cecio);
 
-            this.labels.Add(oicec, oicecLabel);
-            this.labels.Add(cecio, cecioLabel);
+            _labels.Add(oicec, oicecLabel);
+            _labels.Add(cecio, cecioLabel);
 
             Nll(cecioLabel);
-            Fi(Seti(F2), Seti(F2 + 4294967292), LLO);
+            Fi(Seti(F2), Seti(F2 - 4), LLO);
             Malkrz(oicecLabel, XX);
         }
 
         public void Oicec()
         {
-            string cecio = this.jumpLabelStack.Pop();
+            string cecio = _jumpLabelStack.Pop();
 
             if (!cecio.StartsWith("cecio"))
             {
                 throw new ApplicationException("'oicec' cannot be here");
             }
 
-            string oicec = this.jumpLabelStack.Pop();
+            string oicec = _jumpLabelStack.Pop();
 
             Ata(1, Seti(F2));
-            Krz(this.labels[cecio], XX);
-            Nll(this.labels[oicec]);
+            Krz(_labels[cecio], XX);
+            Nll(_labels[oicec]);
             Nta(8, F2);
 
-            this.labels.Remove(cecio);
-            this.labels.Remove(oicec);
+            _labels.Remove(cecio);
+            _labels.Remove(oicec);
         }
 
         public void Kinfit()
         {
             Krz(F2, F0);
-            Nta(this.labels["stack-top"], F0);
+            Nta(_labels["stack-top"], F0);
             Dtosna(2, F0);
             Ata(4, F2);
             Krz(F0, Seti(F2));
@@ -730,9 +728,9 @@ namespace Cent.Core
         public void RoftNia()
         {
             Krz(Seti(F2), F0);
-            Mte(Seti(F2 + 4294967292), Seti(F2 + 4294967288));
-            Anf(Seti(F2), Seti(F2 + 4294967292));
-            Krz(F0, Seti(F2 + 4294967288));
+            Mte(Seti(F2 - 4), Seti(F2 - 8));
+            Anf(Seti(F2), Seti(F2 - 4));
+            Krz(F0, Seti(F2 - 8));
         }
 
         public void Lat32()

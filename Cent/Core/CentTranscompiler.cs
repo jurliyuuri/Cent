@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Cent.Core
 {
     public abstract class CentTranscompiler
     {
         protected static readonly IReadOnlyDictionary<string, int> operatorMap;
-
         protected static readonly IReadOnlyDictionary<string, int> centOperatorMap;
-
         protected static readonly IReadOnlyDictionary<string, int> compareMap;
 
         static CentTranscompiler()
@@ -53,42 +50,34 @@ namespace Cent.Core
 
         public IReadOnlyList<string> InFileNames { get; }
         public bool IsOptimized { get; set; }
+        public Stack<string> CallSubroutines { get; }
+        public Dictionary<string, uint> FunctionNames { get; }
 
-        protected List<string> tokens;
-        private readonly List<List<string>> subroutines;
+        private readonly List<string> _tokens;
+        private readonly List<List<string>> _subroutines;
+        private readonly List<string> _subroutineNames;
+        private bool _isTopMain;
 
-        protected readonly List<string> subroutineNames;
-        protected readonly Dictionary<string, uint> funcNames;
-        protected readonly Stack<string> callSubroutines;
-        protected bool isTopMain;
-
-        protected CentTranscompiler(IList<string> inFileNames, bool isTopMain)
+        protected CentTranscompiler(IEnumerable<string> inFileNames, bool isTopMain = true)
         {
-            this.InFileNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(inFileNames.ToList());
-            
-            this.tokens = new List<string>();
-            this.subroutines = new List<List<string>>();
+            InFileNames = new System.Collections.ObjectModel.ReadOnlyCollection<string>(inFileNames.ToList());
+            FunctionNames = new Dictionary<string, uint>();
+            CallSubroutines = new Stack<string>();
 
-            this.subroutineNames = new List<string>();
-            this.funcNames = new Dictionary<string, uint>();
-            this.callSubroutines = new Stack<string>();
-            this.isTopMain = isTopMain;
+            _tokens = new List<string>();
+            _subroutines = new List<List<string>>();
+            _subroutineNames = new List<string>();
+            _isTopMain = isTopMain;
         }
-
-        protected CentTranscompiler(IList<string> inFileNames) : this(inFileNames, true) { }
-
-        protected CentTranscompiler(string[] inFiles) : this(inFiles.ToList(), true) { }
-
-        protected CentTranscompiler(string[] inFiles, bool isTopMain) : this(inFiles.ToList(), isTopMain) { }
 
         public void Output(string outFileName)
         {
-            if(!this.InFileNames.All(x => x.EndsWith(".cent")))
+            if(!InFileNames.All(x => x.EndsWith(".cent")))
             {
                 throw new ApplicationException("Included to be not cent files");
             }
 
-            foreach (var inFile in this.InFileNames)
+            foreach (var inFile in InFileNames)
             {
                 Lexer(inFile);
             }
@@ -97,20 +86,20 @@ namespace Cent.Core
             ListingTokens();
             if(IsOptimized)
             {
-                List<string> tokens = Optimize(this.tokens);
-                this.tokens.Clear();
-                this.tokens.AddRange(tokens);
+                List<string> tokens = Optimize(_tokens);
+                _tokens.Clear();
+                _tokens.AddRange(tokens);
 
                 List<List<string>> subroutines = new List<List<string>>();
-                foreach (var subroutine in this.subroutines)
+                foreach (var subroutine in _subroutines)
                 {
                     if (subroutine.First() != "xok")
                     {
                         subroutines.Add(Optimize(subroutine));
                     }
                 }
-                this.subroutines.Clear();
-                this.subroutines.AddRange(subroutines);
+                _subroutines.Clear();
+                _subroutines.AddRange(subroutines);
 
                 ListingTokens();
             }
@@ -146,7 +135,7 @@ namespace Cent.Core
                         }
                         else
                         {
-                            this.tokens.Add(buffer.ToString());
+                            _tokens.Add(buffer.ToString());
                         }
                     }
 
@@ -211,7 +200,7 @@ namespace Cent.Core
                             throw new ApplicationException("Invalind word: '>'");
                         }
                         AppendLast();
-                        this.subroutines.Add(funcTokens);
+                        _subroutines.Add(funcTokens);
                         funcTokens = new List<string>();
                         isFunc = false;
                     }
@@ -233,7 +222,7 @@ namespace Cent.Core
         /// </summary>
         private void CheckCentProgramme()
         {
-            foreach (var subroutine in this.subroutines)
+            foreach (var subroutine in _subroutines)
             {
                 // サブルーチン定義が空
                 if(!subroutine.Any())
@@ -279,7 +268,7 @@ namespace Cent.Core
             }
 
             // コードチェック
-            CheckCode(this.tokens);
+            CheckCode(_tokens);
         }
 
         // サブルーチンの関数名が使用可能なものかどうかのチェック
@@ -509,32 +498,32 @@ namespace Cent.Core
         /// <param name="outFileName"></param>
         protected void Write(string outFileName)
         {
-            foreach (var subrt in this.subroutines)
+            foreach (var subrt in _subroutines)
             {
                 if (subrt[0] == "xok")
                 {
-                    this.funcNames.Add(subrt[1], uint.Parse(subrt[2]));
+                    FunctionNames.Add(subrt[1], uint.Parse(subrt[2]));
                 }
                 else
                 {
-                    this.subroutineNames.Add(subrt[0]);
+                    _subroutineNames.Add(subrt[0]);
                 }
             }
             
             PreProcess(outFileName);
 
-            if(isTopMain)
+            if(_isTopMain)
             {
                 DefineMainroutine();
 
-                foreach (var subroutine in this.subroutines.Where(x => x[0] != "xok"))
+                foreach (var subroutine in _subroutines.Where(x => x[0] != "xok"))
                 {
                     DefineSubroutine(subroutine);
                 }
             }
             else
             {
-                foreach (var subroutine in this.subroutines.Where(x => x[0] != "xok"))
+                foreach (var subroutine in _subroutines.Where(x => x[0] != "xok"))
                 {
                     DefineSubroutine(subroutine);
                 }
@@ -553,14 +542,14 @@ namespace Cent.Core
                 Value(result);
             }
             // サブルーチンに登録されている名称であれば
-            else if (this.subroutineNames.Contains(token))
+            else if (_subroutineNames.Contains(token))
             {
                 FenxeSubroutine(token);
             }
             // 外部関数に登録されている名称であれば
-            else if (this.funcNames.ContainsKey(token))
+            else if (FunctionNames.ContainsKey(token))
             {
-                Fenxe(token, this.funcNames[token]);
+                Fenxe(token, FunctionNames[token]);
             }
             else
             {
@@ -701,7 +690,7 @@ namespace Cent.Core
         private void DefineMainroutine()
         {
             MainroutinePreProcess();
-            foreach (var token in this.tokens)
+            foreach (var token in _tokens)
             {
                 WriteTokens(token);
             }
@@ -803,11 +792,11 @@ namespace Cent.Core
         /// </summary>
         private void ListingTokens()
         {
-            Console.WriteLine("main: {0}", this.tokens.Aggregate(new StringBuilder("["),
+            Console.WriteLine("main: {0}", _tokens.Aggregate(new StringBuilder("["),
                 (x, y) => x.Append(y).Append(", "),
                 x => x.Append("]").ToString()));
 
-            Console.WriteLine("subroutines: {0}", this.subroutines.Aggregate(new StringBuilder("["),
+            Console.WriteLine("subroutines: {0}", _subroutines.Aggregate(new StringBuilder("["),
                 (x, y) => x.Append(
                     y.Aggregate(new StringBuilder("["),
                         (z, w) => z.Append(w).Append(", "),
